@@ -13,6 +13,6 @@ import java.util.List;
 public interface UserMapper {
     User toUser(UserCreationRequest userCreationRequest);
     UserResponse toUserResponse(User user);
-    List<UserResponse> toUserResponse(List<User> users);
+    List<UserResponse> toListUserResponse(List<User> users);
     void updateUser(@MappingTarget User user, UserUpdateRequest userUpdateRequest);
 }
