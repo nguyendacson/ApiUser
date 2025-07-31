@@ -26,7 +26,7 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository){
         return args -> {
-            if (userRepository.findByusername("admin").isEmpty()){
+            if (userRepository.findByUsername("admin").isEmpty()){
                 var roles = new HashSet<String>();
 
 

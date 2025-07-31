@@ -1,6 +1,6 @@
 package com.example.ApiUser.configuration;
 
-import com.example.ApiUser.enums.Role;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -25,6 +26,9 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Value("${jwt.signerKey}")
     private  String signerKey;
 
@@ -32,18 +36,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request ->
-                request
-                        .requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
+                request.requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated());
 
-//                        .requestMatchers(HttpMethod.GET, "/users")
-//                        .hasRole(Role.ADMIN.name())
-//                        .hasAnyAuthority("ROLE_ADMIN")
-                .anyRequest().authenticated());
-
+//        httpSecurity.oauth2ResourceServer(oauth2 ->
+//                oauth2.authenticationEntryPoint(customAuthenticationEntryPoint).jwt(
+//                        jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
+//                            .jwtAuthenticationConverter(authenticationConverter()))
+//        );
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(jwtDecoder())
-                            .jwtAuthenticationConverter(authenticationConverter()))
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
@@ -52,7 +57,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    JwtAuthenticationConverter authenticationConverter(){
+    JwtAuthenticationConverter jwtAuthenticationConverter(){
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
