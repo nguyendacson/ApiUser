@@ -1,12 +1,15 @@
 package com.example.ApiUser.exception;
 
 import com.example.ApiUser.dto.response.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Objects;
 
@@ -77,6 +80,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse<?>> handAccessDeniedException(){
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build());
+    }
+
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    ResponseEntity<ApiResponse<?>> DataIntegrityViolationException(){
+        ErrorCode errorCode = ErrorCode.MYSQL;
         return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())

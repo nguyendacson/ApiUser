@@ -2,12 +2,14 @@ package com.example.ApiUser.service;
 
 import com.example.ApiUser.dto.request.UserCreationRequest;
 import com.example.ApiUser.dto.request.UserUpdateRequest;
+import com.example.ApiUser.dto.response.RoleResponse;
 import com.example.ApiUser.dto.response.UserResponse;
+import com.example.ApiUser.entity.Role;
 import com.example.ApiUser.entity.User;
-import com.example.ApiUser.enums.Role;
 import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.mapper.UserMapper;
+import com.example.ApiUser.respository.RoleRepository;
 import com.example.ApiUser.respository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
     public UserResponse createUser(UserCreationRequest userCreationRequest) {
         if (userRepository.existsByUsername(userCreationRequest.getUsername()))
@@ -38,9 +40,11 @@ public class UserService {
 
         User user = userMapper.toUser(userCreationRequest);
 
-        HashSet<String > roles = new HashSet<>();
-        roles.add(Role.USER.name());
-        user.setRoles(roles);
+//        HashSet<String> roles = new HashSet<>();
+//        roles.add(RoleResponse.);
+
+        var roles =  roleRepository.findAllById(List.of("USER"));
+        user.setRoles( new HashSet<>(roles));
 
         user.setPassword(passwordEncoder.encode(userCreationRequest.getPassword()));
 
@@ -55,7 +59,8 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CREATE_PERMISSION1')")
     public List<UserResponse> getUser(){
         return userMapper.toListUserResponse(userRepository.findAll());
     }
@@ -75,6 +80,10 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
 
         userMapper.updateUser(user,userUpdateRequest);
+        user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
+
+        var roles = roleRepository.findAllById(userUpdateRequest.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
