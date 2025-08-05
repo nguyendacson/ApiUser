@@ -1,7 +1,5 @@
 package com.example.ApiUser.dto.response;
-import com.example.ApiUser.entity.Role;
-
-import jakarta.persistence.ManyToMany;
+import com.example.ApiUser.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,10 +10,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String id;
-    String username;
-//    String password;
-    String email;
-    Set<RoleResponse> roles;
+public class RoleResponse {
+    String name;
+    String description;
+    Set<PermissionResponse> permissions;
 }
