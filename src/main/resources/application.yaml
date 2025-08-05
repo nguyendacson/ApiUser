@@ -11,8 +11,12 @@ spring:
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-#    hibernate:
-#      ddl-auto: update
-
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.orm.jdbc.bind: TRACE
 jwt:
     signerKey: "1EYK1xVZ5RTVIk50cVXTXtKMaSN8n5vpuR1rYRJQbad1yvX2OEbb+YbGvPXGKl96"

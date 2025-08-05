@@ -6,6 +6,7 @@ import com.example.ApiUser.dto.request.UserUpdateRequest;
 import com.example.ApiUser.dto.response.UserResponse;
 import com.example.ApiUser.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
