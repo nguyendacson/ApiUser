@@ -1,5 +1,4 @@
 package com.example.ApiUser.dto.response;
-import com.example.ApiUser.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

@@ -1,10 +1,9 @@
 package com.example.ApiUser.dto.response;
-import com.example.ApiUser.entity.Role;
 
-import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -17,5 +16,6 @@ public class UserResponse {
     String username;
 //    String password;
     String email;
+    LocalDate dob;
     Set<RoleResponse> roles;
 }

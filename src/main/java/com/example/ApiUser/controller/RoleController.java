@@ -1,11 +1,8 @@
 package com.example.ApiUser.controller;
 
-import com.example.ApiUser.dto.request.PermissionRequest;
-import com.example.ApiUser.dto.request.RoleRequest;
+import com.example.ApiUser.dto.request.user.RoleRequest;
 import com.example.ApiUser.dto.response.ApiResponse;
 import com.example.ApiUser.dto.response.RoleResponse;
-import com.example.ApiUser.dto.response.RoleResponse;
-import com.example.ApiUser.service.PermissionService;
 import com.example.ApiUser.service.RoleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +21,21 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping
-    public ApiResponse<RoleResponse> create(@RequestBody RoleRequest request){
+    public ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .result(roleService.create(request))
                 .build();
     }
 
     @GetMapping
-    public ApiResponse<List<RoleResponse>> getAll(){
+    public ApiResponse<List<RoleResponse>> getAll() {
         return ApiResponse.<List<RoleResponse>>builder()
                 .result(roleService.getAll())
                 .build();
     }
 
     @DeleteMapping("/{role}")
-    public ApiResponse<Void> delete(@PathVariable String role){
+    public ApiResponse<Void> delete(@PathVariable String role) {
         roleService.delete(role);
         return ApiResponse.<Void>builder().build();
     }

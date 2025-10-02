@@ -1,11 +1,7 @@
 package com.example.ApiUser.service;
 
-import com.example.ApiUser.dto.request.PermissionRequest;
-import com.example.ApiUser.dto.request.RoleRequest;
-import com.example.ApiUser.dto.response.PermissionResponse;
+import com.example.ApiUser.dto.request.user.RoleRequest;
 import com.example.ApiUser.dto.response.RoleResponse;
-import com.example.ApiUser.entity.Permission;
-import com.example.ApiUser.mapper.PermissionMapper;
 import com.example.ApiUser.mapper.RoleMapper;
 import com.example.ApiUser.respository.PermissionRepository;
 import com.example.ApiUser.respository.RoleRepository;

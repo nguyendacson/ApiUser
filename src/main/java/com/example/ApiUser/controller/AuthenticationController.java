@@ -1,8 +1,10 @@
 package com.example.ApiUser.controller;
 
-import com.example.ApiUser.dto.request.IntrospectRequest;
+import com.example.ApiUser.dto.request.user.IntrospectRequest;
+import com.example.ApiUser.dto.request.user.LogoutRequest;
+import com.example.ApiUser.dto.request.user.RefreshTokenRequest;
 import com.example.ApiUser.dto.response.ApiResponse;
-import com.example.ApiUser.dto.request.AuthenticationRequest;
+import com.example.ApiUser.dto.request.user.AuthenticationRequest;
 import com.example.ApiUser.dto.response.AuthenticationResponse;
 import com.example.ApiUser.dto.response.IntrospectResponse;
 import com.example.ApiUser.service.AuthenticationService;
@@ -37,6 +39,23 @@ public class AuthenticationController {
             throws ParseException, JOSEException {
         var result = authenticationService.introspectResponse(introspectRequest);
         return ApiResponse.<IntrospectResponse>builder()
+                .result(result)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest logoutRequest)
+            throws ParseException, JOSEException {
+        authenticationService.logout(logoutRequest);
+        return ApiResponse.<Void>builder()
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refreshResponseApiResponse(@RequestBody RefreshTokenRequest refreshTokenRequest)
+            throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(refreshTokenRequest);
+        return ApiResponse.<AuthenticationResponse>builder()
                 .result(result)
                 .build();
     }

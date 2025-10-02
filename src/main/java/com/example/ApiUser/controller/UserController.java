@@ -1,15 +1,13 @@
 package com.example.ApiUser.controller;
 
 import com.example.ApiUser.dto.response.ApiResponse;
-import com.example.ApiUser.dto.request.UserCreationRequest;
-import com.example.ApiUser.dto.request.UserUpdateRequest;
+import com.example.ApiUser.dto.request.user.UserCreationRequest;
+import com.example.ApiUser.dto.request.user.UserUpdateRequest;
 import com.example.ApiUser.dto.response.UserResponse;
 import com.example.ApiUser.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,9 +27,9 @@ public class UserController {
     }
 
     @GetMapping
-    ApiResponse<List<UserResponse>> getUsers(){
+        ApiResponse<List<UserResponse>> getUsers(){
         return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getUser())
+                .result(userService.getAllUser())
                 .build();
     }
 
@@ -44,6 +42,7 @@ public class UserController {
 
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(){
+        log.info("ON MyInfo");
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();
@@ -51,6 +50,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     UserResponse updateUser(@PathVariable String userId,@RequestBody UserUpdateRequest userUpdateRequest){
+        log.info("In Update");
         return userService.updateUser(userId,userUpdateRequest);
     }
 

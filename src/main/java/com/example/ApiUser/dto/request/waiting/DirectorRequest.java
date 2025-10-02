@@ -1,6 +1,5 @@
-package com.example.ApiUser.dto.request;
+package com.example.ApiUser.dto.request.waiting;
 
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PermissionRequest {
+public class DirectorRequest {
     String name;
-    String description;
 }

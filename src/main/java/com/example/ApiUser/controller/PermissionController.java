@@ -1,6 +1,6 @@
 package com.example.ApiUser.controller;
 
-import com.example.ApiUser.dto.request.PermissionRequest;
+import com.example.ApiUser.dto.request.user.PermissionRequest;
 import com.example.ApiUser.dto.response.ApiResponse;
 import com.example.ApiUser.dto.response.PermissionResponse;
 import com.example.ApiUser.service.PermissionService;
@@ -8,7 +8,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.ApiUser.dto.request;
+package com.example.ApiUser.dto.request.user;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -6,9 +6,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationRequest {
-    String username;
-    String password;
-    String email;
+public class LogoutRequest {
+    String token;
 }

@@ -1,11 +1,9 @@
 package com.example.ApiUser.mapper;
 
-import com.example.ApiUser.dto.request.UserCreationRequest;
-import com.example.ApiUser.dto.request.UserUpdateRequest;
+import com.example.ApiUser.dto.request.user.UserCreationRequest;
+import com.example.ApiUser.dto.request.user.UserUpdateRequest;
 import com.example.ApiUser.dto.response.UserResponse;
-import com.example.ApiUser.entity.Role;
-import com.example.ApiUser.entity.User;
-import com.example.ApiUser.respository.RoleRepository;
+import com.example.ApiUser.entity.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
