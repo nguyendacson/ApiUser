@@ -1,18 +1,23 @@
-package com.example.ApiUser.entity;
+package com.example.ApiUser.entity.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Entity
-@Data
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Permission {
+public class Role {
     @Id
     String name;
     String description;
+
+    @ManyToMany
+    Set<Permission> permissions;
 }

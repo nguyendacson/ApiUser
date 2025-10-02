@@ -1,11 +1,9 @@
 package com.example.ApiUser.service;
 
-import com.example.ApiUser.dto.request.UserCreationRequest;
-import com.example.ApiUser.dto.request.UserUpdateRequest;
-import com.example.ApiUser.dto.response.RoleResponse;
+import com.example.ApiUser.dto.request.user.UserCreationRequest;
+import com.example.ApiUser.dto.request.user.UserUpdateRequest;
 import com.example.ApiUser.dto.response.UserResponse;
-import com.example.ApiUser.entity.Role;
-import com.example.ApiUser.entity.User;
+import com.example.ApiUser.entity.user.User;
 import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.mapper.UserMapper;
@@ -44,6 +42,8 @@ public class UserService {
 //        roles.add(RoleResponse.);
 
         var roles =  roleRepository.findAllById(List.of("USER"));
+//        var roles = Role.USER;
+//        user.setRoles(new HashSet<>(roles.ordinal()));
         user.setRoles( new HashSet<>(roles));
 
         user.setPassword(passwordEncoder.encode(userCreationRequest.getPassword()));
@@ -61,7 +61,7 @@ public class UserService {
 
 //    @PreAuthorize("hasRole('ADMIN')")
     @PreAuthorize("hasAuthority('CREATE_PERMISSION1')")
-    public List<UserResponse> getUser(){
+    public List<UserResponse> getAllUser(){
         return userMapper.toListUserResponse(userRepository.findAll());
     }
 

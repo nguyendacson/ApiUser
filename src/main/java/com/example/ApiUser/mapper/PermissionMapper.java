@@ -1,14 +1,9 @@
 package com.example.ApiUser.mapper;
 
-import com.example.ApiUser.dto.request.PermissionRequest;
-import com.example.ApiUser.dto.request.UserCreationRequest;
-import com.example.ApiUser.dto.request.UserUpdateRequest;
+import com.example.ApiUser.dto.request.user.PermissionRequest;
 import com.example.ApiUser.dto.response.PermissionResponse;
-import com.example.ApiUser.dto.response.UserResponse;
-import com.example.ApiUser.entity.Permission;
-import com.example.ApiUser.entity.User;
+import com.example.ApiUser.entity.user.Permission;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
 
 import java.util.List;
 

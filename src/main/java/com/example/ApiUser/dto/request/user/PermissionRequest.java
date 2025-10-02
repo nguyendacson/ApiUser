@@ -1,18 +1,14 @@
-package com.example.ApiUser.dto.request;
+package com.example.ApiUser.dto.request.user;
 
-import com.example.ApiUser.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RoleRequest {
+public class PermissionRequest {
     String name;
     String description;
-    Set<String> permissions;
 }

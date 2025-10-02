@@ -1,4 +1,4 @@
-package com.example.ApiUser.dto.request;
+package com.example.ApiUser.dto.request.user;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
