@@ -25,7 +25,8 @@ public enum ErrorCode {
 
     //    Movie
     MOVIE_NOT_EXISTED(1013,"Movies not existed",HttpStatus.BAD_REQUEST),
-    DATA_MOVIE_NOT_EXISTED(1014,"Data Movies not existed",HttpStatus.BAD_REQUEST);
+    DATA_MOVIE_NOT_EXISTED(1014,"Data Movies not existed",HttpStatus.BAD_REQUEST),
+    ERROR_CREATE_DATA_MOVIE(1015,"Error create Call Data Movie",HttpStatus.BAD_REQUEST);
 
 
     ;

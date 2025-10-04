@@ -24,11 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,107 +50,19 @@ public class MovieService {
     WatchingListRepository watchingListRepository;
     RestTemplate restTemplate;
 
+    private <D, T> Set<T> mapData(List<D> data, Function<D, Optional<T>> findFunc, Function<D, T> createAndSaveFunc) {
 
-    private <D, T> Set<T> mapData(List<D> data, Function<D, Optional<T>> findFunc, Function<D, T> createEntityFunc, Consumer<T> saveFunc) {
         if (data == null || data.isEmpty()) {
             return Collections.emptySet();
         }
-        return data.stream().map(item -> findFunc.apply(item).orElseGet(() -> {
-            T entity = createEntityFunc.apply(item);
-            saveFunc.accept(entity);
-            return entity;
-        })).collect(Collectors.toSet());
+
+        return data.stream()
+//                .filter(item -> item != null && !item.toString().trim().isEmpty())  // Filter null/empty (adjust cho D=String)
+                .map(item -> findFunc.apply(item)
+                        .orElseGet(() -> createAndSaveFunc.apply(item)))
+                .collect(Collectors.toSet());
     }
 
-//    public MovieResponse saveMovieFromApi(String apiUrl) {
-//        ApiMovieResponse apiMovieResponse = restTemplate.getForObject(apiUrl, ApiMovieResponse.class);
-//
-//        if (apiMovieResponse == null || apiMovieResponse.getMovie() == null) {
-//            throw new RuntimeException("API không trả dữ liệu movie");
-//        }
-//
-//        MovieResponse movieResponse = apiMovieResponse.getMovie();
-//
-//        List<EpisodeResponse> episodeResponses = apiMovieResponse.getEpisodeResponseList();
-//
-//        Movie movie = movieMapper.toMovie(movieResponse);
-//
-//        movie.setCreated(movieResponse.getCreated().getTime());
-//        movie.setModified(movieResponse.getModified().getTime());
-//
-//        movie.setActors(mapData(
-//                movieResponse.getActors(),
-//                actorRepository::findByName,
-//                dataName -> actorRepository.save(Actor.builder().name(dataName).build()),
-//                actorRepository::save
-//        ));
-//
-//        movie.setDirectors(mapData(
-//                movieResponse.getDirectors(),
-//                directorRepository::findByName,
-//                dataName -> directorRepository.save(Director.builder().name(dataName).build()),
-//                directorRepository::save
-//        ));
-//
-//        movie.setCategories(mapData(
-//                movieResponse.getCategories(),
-//                data -> categoryRepository.findById(data.getId()),
-//                categoryMapper::toEntity, categoryRepository::save
-//        ));
-//
-//        movie.setCountries(mapData(
-//                movieResponse.getCountries(),
-//                data -> countryRepository.findById(data.getId()),
-//                countryMapper::toEntity, countryRepository::save
-//        ));
-//
-//        Movie saved = movieRepository.save(movie);
-//
-//        List<Episode> episodes =
-//                apiMovieResponse.getEpisodeResponseList().stream().map(epResp -> createOrUpdateEpisodeWithDataMovies(epResp, saved)).toList();
-//        /*
-//               episodeResponses.stream().map(epResp -> createOrUpdateEpisodeWithDataMovies(epResp, saved)).toList();
-//            saved.getEpisodes().clear();
-//
-//        */
-//        saved.getEpisodes().addAll(episodes);
-//        return movieMapper.toMovieResponse(movieRepository.save(saved));
-//    }
-
-//    private Episode createOrUpdateEpisodeWithDataMovies(EpisodeResponse epResp, Movie movie) {
-//        // Tìm Episode theo movieId + episodeNumber
-//        Optional<Episode> optionalEp = episodeRepository.findByMovieIdAndServerName(movie.getId(), epResp.getServerName());
-//
-//        Episode ep;
-//        if (optionalEp.isPresent()) {
-//            // Nếu Episode đã có trong DB → update
-//            ep = optionalEp.get();
-
-    /// /            ep.setName(epResp.getName()); // update thông tin khác nếu muốn
-    /// /            ep.setModified(LocalDateTime.now());
-//        } else {
-//            // Nếu chưa có → tạo mới
-//            ep = episodeMapper.toEntity(epResp);
-//            ep.setMovie(movie);
-//            ep = episodeRepository.save(ep); // save để có id
-//        }
-//
-//        // Danh sách DataMovie name mới từ API
-//        Set<String> inputMovieDataNames = epResp.getDataMovies().stream().map(DataMovieResponse::getName).collect(Collectors.toSet());
-//
-//        // Danh sách DataMovie name đã tồn tại trong DB
-//        Set<String> existingNames = dataMovieRepository.findExistingName(inputMovieDataNames, ep.getId());
-//
-//
-//        Episode episode = ep; // final hoặc effectively final
-//        // Tạo các DataMovie mới
-//        Set<DataMovie> newDataMovies = epResp.getDataMovies().stream().filter(dmResp -> !existingNames.contains(dmResp.getName())).map(dataMovieMapper::toEntity).peek(dm -> dm.setEpisode(episode)).collect(Collectors.toSet());
-//
-//        // Add vào tập hiện có (không clear())
-//        ep.getDataMovies().addAll(newDataMovies);
-//
-//        return episodeRepository.save(ep);
-//    }
     public Movie mapdataMovie(MovieResponse movieResponse) {
         Movie movie = movieMapper.toMovie(movieResponse);
 
@@ -165,88 +73,135 @@ public class MovieService {
         movie.setActors(mapData(
                 movieResponse.getActors(),
                 actorRepository::findByName,
-                dataName -> actorRepository.save(Actor.builder().name(dataName).build()),
-                actorRepository::save));
+                dataName -> actorRepository.save(Actor.builder().name(dataName).build())));
+
 
         movie.setDirectors(mapData(
                 movieResponse.getDirectors(),
                 directorRepository::findByName,
-                dataName -> directorRepository.save(Director.builder().name(dataName).build()),
-                directorRepository::save));
+                dataName -> directorRepository.save(Director.builder().name(dataName).build())
+        ));
 
         movie.setCategories(mapData(
                 movieResponse.getCategories(),
-                data -> categoryRepository.findById(data.getId()),
-                categoryMapper::toEntity,
-                categoryRepository::save));
+                categoryResponse -> categoryRepository.findById(categoryResponse.getId()),
+                categoryResponse -> categoryRepository.save(categoryMapper.toEntity(categoryResponse))
+        ));
 
         movie.setCountries(mapData(
                 movieResponse.getCountries(),
-                data -> countryRepository.findById(data.getId()),
-                countryMapper::toEntity,
-                countryRepository::save));
+                countryResponse -> countryRepository.findById(countryResponse.getId()),
+                countryResponse -> countryRepository.save(countryMapper.toEntity(countryResponse))
+        ));
 
         return movie;
     }
 
     public MovieResponse newData(String apiUrl) {
         ApiMovieResponse apiMovieResponse = restTemplate.getForObject(apiUrl, ApiMovieResponse.class);
+
         if (apiMovieResponse == null || apiMovieResponse.getMovie() == null) {
             throw new RuntimeException("API không trả dữ liệu movie");
         }
+
         MovieResponse movieResponse = apiMovieResponse.getMovie();
+
         Movie movie = mapdataMovie(movieResponse);
+
         Movie saveData = movieRepository.save(movie);
-        List<Episode> episodes = apiMovieResponse.getEpisodeResponseList().stream().map(epResp -> createEpisodeWithDataMovies(epResp, saveData)).toList();
+
+        Movie finalSaveData = saveData;
+
+        List<Episode> episodes = apiMovieResponse.getEpisodeResponseList().stream()
+                .map(epResp -> createEpisodeWithDataMovies(epResp, finalSaveData))
+                .toList();
+
         saveData.getEpisodes().addAll(episodes);
-        return movieMapper.toMovieResponse(movieRepository.save(saveData));
+        saveData = movieRepository.save(saveData);
+
+        return movieMapper.toMovieResponse(saveData);
     }
 
-    private MovieResponse updateData(String apiUrl) {
+    public MovieResponse updateData(String apiUrl) {
         ApiMovieResponse apiMovieResponse = restTemplate.getForObject(apiUrl, ApiMovieResponse.class);
+
         if (apiMovieResponse == null || apiMovieResponse.getMovie() == null) {
             throw new RuntimeException("API không trả dữ liệu movie");
         }
-        MovieResponse movieResponse = apiMovieResponse.getMovie();
-        Movie movie = movieRepository.findById(movieResponse.getId()).orElseThrow(() -> new RuntimeException("Movie chưa tồn tại trong DB"));
-        List<Episode> updatedEpisodes = apiMovieResponse.getEpisodeResponseList().stream().map(epResp -> updateEpisodeWithDataMovies(epResp, movie)).toList();
 
-        // movie.getEpisodes().clear();
-        movie.getEpisodes().addAll(updatedEpisodes);
-        Movie savedMovie = movieRepository.save(movie);
-        return movieMapper.toMovieResponse(savedMovie);
+        MovieResponse movieResponse = apiMovieResponse.getMovie();
+
+        Optional<Movie> optionalMovie = movieRepository.findById(movieResponse.getId());
+
+        Movie saveData = optionalMovie.orElseThrow(() ->
+                new RuntimeException("Movie not found with id: " + movieResponse.getId()));
+
+        saveData.setStatus(movieResponse.getStatus());
+        saveData.setEpisode_current(movieResponse.getEpisode_current());
+
+        saveData = movieRepository.save(saveData);
+
+        Movie finalSaveData = saveData;
+
+        List<Episode> episodes = apiMovieResponse.getEpisodeResponseList().stream()
+                .map(epResp -> updateEpisodeWithDataMovies(epResp, finalSaveData))
+                .toList();
+
+        saveData.getEpisodes().addAll(episodes);
+        saveData = movieRepository.save(saveData);
+
+        return movieMapper.toMovieResponse(saveData);
     }
 
     private Episode createEpisodeWithDataMovies(EpisodeResponse epResp, Movie movie) {
         Episode ep;
         ep = episodeMapper.toEntity(epResp);
         ep.setMovie(movie);
+        ep.setDataMovies(new HashSet<>());
         ep = episodeRepository.save(ep);
-        Episode episode = ep;
-        Set<DataMovie> newDataMovies = epResp.getDataMovies().stream().map(dataMovieMapper::toEntity).peek(dm -> dm.setEpisode(episode)).collect(Collectors.toSet());
+
+        Episode finalEp = ep;
+        Set<DataMovie> newDataMovies = epResp.getDataMovies().stream()
+                .map(dataMovieMapper::toEntity)
+                .peek(dm -> dm.setEpisode(finalEp))  // ep.id có sẵn → episode_id sẽ != null khi insert
+                .collect(Collectors.toSet());
+
         ep.getDataMovies().addAll(newDataMovies);
-        return episodeRepository.save(ep);
+        return episodeRepository.save(ep);  // Cascade persist DataMovie với episode_id đúng
     }
+
 
     private Episode updateEpisodeWithDataMovies(EpisodeResponse epResp, Movie movie) {
-        Optional<Episode> optionalEpisode = episodeRepository.findByMovieIdAndServerName(epResp.getServerName(), movie.getId());
-        Episode episode;
+        Optional<Episode> optionalEpisode = episodeRepository.findByMovieIdAndServerName(movie.getId(), epResp.getServerName());
+        Episode ep;
         if (optionalEpisode.isPresent()) {
-            episode = optionalEpisode.get();
-            episode.setServerName(epResp.getServerName());
+            ep = optionalEpisode.get();
+            ep.setServerName(epResp.getServerName());
         } else {
-            episode = episodeMapper.toEntity(epResp);
-            episode.setMovie(movie);
-            episode = episodeRepository.save(episode);
+            ep = episodeMapper.toEntity(epResp);
+            ep.setMovie(movie);
+
+            ep.setDataMovies(new HashSet<>());
+            ep = episodeRepository.save(ep);
         }
-        Episode ep = episode;
-        Set<String> inputMovieDataNames = epResp.getDataMovies().stream().map(DataMovieResponse::getName).collect(Collectors.toSet());
+
+        Set<String> inputMovieDataNames = epResp.getDataMovies()
+                .stream().map(DataMovieResponse::getName)
+                .collect(Collectors.toSet());
+
         Set<String> existingNames = dataMovieRepository.findExistingName(inputMovieDataNames, ep.getId());
-        Set<DataMovie> newDataMovies = epResp.getDataMovies().stream().filter(dmResp -> !existingNames.contains(dmResp.getName())).map(dataMovieMapper::toEntity).peek(dm -> dm.setEpisode(ep)).collect(Collectors.toSet());
-        ep.getDataMovies().addAll(newDataMovies);
+
+        Episode finalEp = ep;
+        Set<DataMovie> updateDataMovies = epResp.getDataMovies().stream()
+                .filter(dmResp -> !existingNames.contains(dmResp.getName()))
+                .map(dataMovieMapper::toEntity)
+                .peek(dm -> dm.setEpisode(finalEp))
+                .collect(Collectors.toSet());
+
+        ep.getDataMovies().addAll(updateDataMovies);
+
         return episodeRepository.save(ep);
     }
-
 
     public WatchingResponse createWatchingList(WatchingCreateRequest watchingCreateRequest) {
         String getIdUser = watchingCreateRequest.getUserId();

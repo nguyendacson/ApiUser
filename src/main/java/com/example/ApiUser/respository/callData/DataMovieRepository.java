@@ -12,8 +12,8 @@ import java.util.Set;
 @Repository
 public interface DataMovieRepository extends JpaRepository<DataMovie, String> {
 
-    @Query("SELECT dm.name FROM DataMovie dm WHERE dm.name IN :names AND dm.episode.movie.id = :movieId")
-    Set<String> findExistingName(@Param("names") Set<String> names, @Param("movieId") String movieId);
+    @Query("SELECT dm.name FROM DataMovie dm WHERE dm.name IN :names AND dm.episode.id = :episodeId")
+    Set<String> findExistingName(@Param("names") Set<String> names, @Param("episodeId") String episodeId);
 
     Optional<DataMovie> findByName(String name); // Thêm dòng này
 }

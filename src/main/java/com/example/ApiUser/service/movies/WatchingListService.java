@@ -42,8 +42,22 @@ public class WatchingListService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        //        log.info("watchingLists = {}", watchingLists);
-        List<WatchingResponse> responses = watchingLists.stream().map(item -> WatchingResponse.builder().movieDTO(MovieDTO.builder().id(item.getMovie().getId()).name(item.getMovie().getName()).slug(item.getMovie().getSlug()).origin_name(item.getMovie().getOrigin_name()).poster_url(item.getMovie().getPoster_url()).thumb_url(item.getMovie().getThumb_url()).episode_current(item.getMovie().getEpisode_current()).episode_total(item.getMovie().getEpisode_total()).quality(item.getMovie().getQuality()).build()).progressSeconds(item.getProgressSeconds()).lastWatchedAt(item.getLastWatchedAt()).build()).toList();
+        List<WatchingResponse> responses = watchingLists.stream()
+                .map(item -> WatchingResponse.builder()
+                        .movieDTO(MovieDTO.builder()
+                                .id(item.getMovie().getId())
+                                .name(item.getMovie().getName())
+                                .slug(item.getMovie().getSlug())
+                                .origin_name(item.getMovie().getOrigin_name())
+                                .poster_url(item.getMovie().getPoster_url())
+                                .thumb_url(item.getMovie().getThumb_url())
+                                .episode_current(item.getMovie().getEpisode_current())
+                                .episode_total(item.getMovie().getEpisode_total())
+                                .quality(item.getMovie().getQuality()).build())
+                        .progressSeconds(item.getProgressSeconds())
+                        .lastWatchedAt(item.getLastWatchedAt())
+                        .build())
+                .toList();
         log.info("responses = {}", responses);
 
         return responses;

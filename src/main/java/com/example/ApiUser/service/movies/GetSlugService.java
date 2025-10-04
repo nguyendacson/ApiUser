@@ -8,8 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 
@@ -40,10 +46,12 @@ public class GetSlugService {
         }
 
         int totalPages = firstPage.getPagination().getTotalPages();
+//        int totalPages = 2;
         System.out.println("Tổng số trang: " + totalPages);
 
         // List để chứa slug
-        Set<String> allSlugs = ConcurrentHashMap.newKeySet();;
+        Set<String> allSlugs = ConcurrentHashMap.newKeySet();
+        firstPage.getItems().forEach(item -> allSlugs.add(item.getSlug()));
 
         // Crawl từ page 2 -> totalPages
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -60,7 +68,7 @@ public class GetSlugService {
 
                         if (response != null && response.getItems() != null) {
                             response.getItems().forEach(item ->
-                                allSlugs.add(item.getSlug())
+                                    allSlugs.add(item.getSlug())
                             );
 
                             Thread.sleep(500 + random.nextInt(1000));
@@ -87,7 +95,10 @@ public class GetSlugService {
         return allSlugs;
     }
 
-    public void createAndUpdate(){
+    private record SlugSets(Set<String> newSlugs, Set<String> duplicates) {
+    }
+
+    private SlugSets checkSlug() {
         Set<String> slugs = crawlAllSlug();
 
         Set<String> existedSlugs = movieRepository.findAll().stream()
@@ -97,38 +108,54 @@ public class GetSlugService {
         Set<String> duplicates = slugs.stream()
                 .filter(existedSlugs::contains)
                 .collect(Collectors.toSet());
-        
-        Set<String> duplicateAndNotCompleted = movieRepository.findOngoingSlugsIn(duplicates);
 
         Set<String> newSlugs = slugs.stream()
                 .filter(slug -> !existedSlugs.contains(slug))
                 .collect(Collectors.toSet());
 
-        newSlugs.forEach(this::createNewSlug);
-        duplicateAndNotCompleted.forEach(this::updateSlug);
-
-//        System.out.println("✅ Slug đã tồn tại àm đang going: " + duplicateAndNotCompleted.size());
-//        System.out.println("✅ Slug mới: " + newSlugs.size());
-//        System.out.println("✅ Slug mới: " + movieRepository.count());
+        return new SlugSets(newSlugs, duplicates);
     }
 
-    private void createNewSlug(String slug) {
-        String apiUrl = String.format(MOVIE_DETAIL_URL, slug);
-        try {
-            MovieResponse movie = movieService.newData(apiUrl);
-            System.out.println("Đã import: " + movie.getName());
-        } catch (Exception e) {
-            System.out.println("❌ Lỗi khi import slug " + slug + ": " + e.getMessage());
+    public void createCallData() {
+        SlugSets sets = checkSlug();
+        Set<String> newSlugs = sets.newSlugs();
+
+        if (newSlugs.isEmpty()) {
+            System.out.println("✅ Không có slug mới để import!");
+            return;
         }
+
+        newSlugs.forEach(slug -> {
+            String apiUrl = String.format(MOVIE_DETAIL_URL, slug);
+            try {
+                MovieResponse movie = movieService.newData(apiUrl);
+                System.out.println("Đã import: " + movie.getName());
+                movieRepository.flush(); // Flush sau mỗi save
+            } catch (Exception e) {
+                System.out.println("❌ Lỗi khi import slug " + slug + ": " + e.getMessage());
+            }
+        });
     }
-    
-    private void updateSlug(String slug) {
-        String apiUrl = String.format(MOVIE_DETAIL_URL, slug);
-        try {
-            MovieResponse movie = movieService.newData(apiUrl);
-            System.out.println("Đã import: " + movie.getName());
-        } catch (Exception e) {
-            System.out.println("❌ Lỗi khi import slug " + slug + ": " + e.getMessage());
+
+    public void updateCallData() {
+        SlugSets sets = checkSlug();
+        Set<String> duplicates = sets.newSlugs();
+
+        Set<String> duplicateAndNotCompleted = movieRepository.findOngoingSlugsIn(duplicates);
+
+        if (duplicateAndNotCompleted.isEmpty()) {
+            System.out.println("✅ Không có data mới để update!");
+            return;
         }
+
+        duplicateAndNotCompleted.forEach(slug -> {
+            String apiUrl = String.format(MOVIE_DETAIL_URL, slug);
+            try {
+                MovieResponse movie = movieService.updateData(apiUrl);
+                System.out.println("Đã update: " + movie.getName());
+            } catch (Exception e) {
+                System.out.println("❌ Lỗi khi update slug " + slug + ": " + e.getMessage());
+            }
+        });
     }
 }
