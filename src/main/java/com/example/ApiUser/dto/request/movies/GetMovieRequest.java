@@ -12,4 +12,5 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GetMovieRequest {
     String userId;
+    ádadasdasdasdasdas;
 }
