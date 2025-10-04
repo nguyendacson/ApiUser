@@ -16,16 +16,14 @@ public class DataMovie {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-//    @Column(unique = true)
     String name;
     String slug;
     String filename;
     String link_embed;
     String link_m3u8;
 
-    @ManyToOne
-    @JoinColumn(name = "episode_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "episode_id", nullable = false)
     Episode episode;
-
 
 }

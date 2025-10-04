@@ -10,11 +10,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WatchingCreateRequest {
+public class GetMovieRequest {
     String userId;
     String movieId;
     String dataMovieId;
     Integer progressSeconds;
     LocalDateTime lastWatchedAt;
-
 }

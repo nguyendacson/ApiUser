@@ -24,7 +24,7 @@ public class Episode {
     @JoinColumn(name = "movie_id")
     Movie movie;
 
-    @OneToMany(mappedBy = "episode",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<DataMovie> dataMovies = new HashSet<>();
 
 }
