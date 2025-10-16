@@ -12,10 +12,13 @@ public class MovieDTO {
     String id;
     String name;
     String slug;
+    String type;
     String origin_name;
     String poster_url;
     String thumb_url;
     String episode_current;
     String episode_total;
+    String time;
+    String year;
     String quality;
 }

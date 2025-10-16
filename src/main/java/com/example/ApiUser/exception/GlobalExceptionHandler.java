@@ -1,6 +1,6 @@
 package com.example.ApiUser.exception;
 
-import com.example.ApiUser.dto.response.ApiResponse;
+import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,8 +19,20 @@ import java.util.Objects;
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse<?>> handlerRuntimeException(RuntimeException runtimeException){
+//    @ExceptionHandler(value = Exception.class)
+//    ResponseEntity<ApiResponse<?>> handlerRuntimeException(RuntimeException runtimeException){
+//        ApiResponse<?> apiResponse = new ApiResponse<>();
+//
+//        apiResponse.setCode(ErrorCode.USER_OTHER_EXCEPTION.getCode());
+//        apiResponse.setMessage(ErrorCode.USER_OTHER_EXCEPTION.getMessage());
+//
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
+
+    @ExceptionHandler(value = RuntimeException.class)
+    ResponseEntity<ApiResponse<?>> handlerRuntimeException(RuntimeException exception) {
+        exception.printStackTrace(); // 👈 thêm dòng này
+
         ApiResponse<?> apiResponse = new ApiResponse<>();
 
         apiResponse.setCode(ErrorCode.USER_OTHER_EXCEPTION.getCode());
@@ -29,6 +41,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
+
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse<?>> handlerAppException(AppException appException){
 
@@ -36,6 +49,7 @@ public class GlobalExceptionHandler {
 
         ApiResponse<?> apiResponse = new ApiResponse<>();
 
+        apiResponse.setSuccess(false);
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
 

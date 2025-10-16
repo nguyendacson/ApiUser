@@ -14,5 +14,6 @@ import java.time.LocalDateTime;
 public class WatchingResponse {
     Integer progressSeconds;
     LocalDateTime lastWatchedAt;
+    String dataMovieId;
     MovieDTO movieDTO;
 }
