@@ -1,6 +1,6 @@
 package com.example.ApiUser.configuration;
 
-import com.example.ApiUser.dto.response.ApiResponse;
+import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import io.jsonwebtoken.ExpiredJwtException;

@@ -1,8 +1,8 @@
 package com.example.ApiUser.configuration;
 
-import com.example.ApiUser.entity.user.User;
-import com.example.ApiUser.respository.RoleRepository;
-import com.example.ApiUser.respository.UserRepository;
+import com.example.ApiUser.entity.authentication.users.User;
+import com.example.ApiUser.repository.authentication.RoleRepository;
+import com.example.ApiUser.repository.authentication.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
@@ -19,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+
+
 public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
@@ -31,6 +34,7 @@ public class ApplicationInitConfig {
                 var roles = roleRepository.findAllById(List.of("ADMIN"));
 
                 User user = User.builder()
+                        .name("Admin SonND")
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
                         .roles(new HashSet<>(roles))

@@ -1,7 +1,7 @@
 package com.example.ApiUser.configuration;
 
-import com.example.ApiUser.dto.request.user.IntrospectRequest;
-import com.example.ApiUser.service.AuthenticationService;
+import com.example.ApiUser.dto.request.authentication.token.IntrospectRequest;
+import com.example.ApiUser.service.authentication.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,33 +20,34 @@ import java.util.Objects;
 public class CustomJwtDecoder implements JwtDecoder {
 
     @Value("${jwt.signerKey}")
-    private  String signerKey;
+    private String signerKey;
 
     @Autowired
     private AuthenticationService authenticationService;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
+
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
             var response = authenticationService.introspectResponse(IntrospectRequest.builder()
-                            .token(token)
+                    .token(token)
                     .build());
-            if (!response.isValid()){
+            if (!response.isValid()) {
                 throw new JwtException("Token invalid");
             }
-        }catch (JOSEException | ParseException e){
-            throw  new JwtException(e.getMessage());
+        } catch (JOSEException | ParseException e) {
+            throw new JwtException(e.getMessage());
         }
 
-        if (Objects.isNull(nimbusJwtDecoder)){
-            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(),"HS512");
-            nimbusJwtDecoder =  NimbusJwtDecoder
+        if (Objects.isNull(nimbusJwtDecoder)) {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
+            nimbusJwtDecoder = NimbusJwtDecoder
                     .withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
-        System.out.println(nimbusJwtDecoder);
+//        System.out.println(nimbusJwtDecoder);
 
         return nimbusJwtDecoder.decode(token);
     }

@@ -10,13 +10,32 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-#logging:
-#  level:
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.orm.jdbc.bind: TRACE
+
+  redis:
+    host: localhost
+    port: 6379
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      cache-null-values: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dacson1822003@gmail.com
+    password: vpow jxjh yree xxxv
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 jwt:
-    signerKey: "1EYK1xVZ5RTVIk50cVXTXtKMaSN8n5vpuR1rYRJQbad1yvX2OEbb+YbGvPXGKl96"
+  signerKey: "1EYK1xVZ5RTVIk50cVXTXtKMaSN8n5vpuR1rYRJQbad1yvX2OEbb+YbGvPXGKl96"
