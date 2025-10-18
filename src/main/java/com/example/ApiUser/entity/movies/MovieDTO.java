@@ -19,6 +19,7 @@ public class MovieDTO {
     String episode_current;
     String episode_total;
     String time;
+    String content;
     String year;
     String quality;
 }

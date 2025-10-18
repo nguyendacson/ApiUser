@@ -2,10 +2,10 @@ package com.example.ApiUser.service.movies.movieService;
 
 import com.example.ApiUser.dto.request.movies.MovieFilterRequest;
 import com.example.ApiUser.dto.response.callMovies.CategoryResponse;
+import com.example.ApiUser.dto.response.callMovies.CountryResponse;
+import com.example.ApiUser.dto.response.callMovies.EpisodeResponse;
 import com.example.ApiUser.dto.response.callMovies.MovieCallResponse;
-import com.example.ApiUser.entity.callMovies.Created;
-import com.example.ApiUser.entity.callMovies.Modified;
-import com.example.ApiUser.entity.callMovies.Movie;
+import com.example.ApiUser.entity.callMovies.*;
 import com.example.ApiUser.entity.movies.MovieDTO;
 import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
@@ -24,10 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -45,6 +42,7 @@ public class MovieService {
     CountryMapper countryMapper;
     EpisodeMapper episodeMapper;
     MovieDTOMapper movieDTOMapper;
+    DataMovieMapper dataMovieMapper;
     BuildSpecificationHelper buildSpecificationHelper;
 
     private MovieCallResponse mappSet(Movie movieCall) {
@@ -90,6 +88,23 @@ public class MovieService {
 //        movieCallResponse.setEpisodes(episodeResponses);
 
         return movieCallResponse;
+    }
+
+    public List<EpisodeResponse> episodeByMovie(String movieId) {
+        Movie movie = movieCallRepository.findById(movieId)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+
+        return movie.getEpisodes().stream()
+//                .sorted(Comparator.comparing(Episode::getServerName, Comparator.nullsLast(String::compareTo)))
+                .map(episode -> EpisodeResponse.builder()
+                        .serverName(episode.getServerName())
+                        .dataMovies(episode.getDataMovies().stream()
+                                .sorted(Comparator.comparing(DataMovie::getName, Comparator.nullsLast(String::compareTo)))
+                                .map(dataMovieMapper::toResponse)
+                                .toList()
+                        )
+                        .build()
+                ).toList();
     }
 
     public MovieDTO getMovieById(String id) {
@@ -145,5 +160,30 @@ public class MovieService {
                 .map(movieDTOMapper::toDTO)
                 .toList();
     }
+
+    @PreAuthorize("isAuthenticated")
+    public List<String> actorByMovie(String movieId) {
+        Movie movie = movieCallRepository.findById(movieId)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        List<Actor> list = new ArrayList<>(movie.getActors());
+        return actorMapper.actorsToStrings(list);
+    }
+
+    @PreAuthorize("isAuthenticated")
+    public List<String> directorByMovie(String movieId) {
+        Movie movie = movieCallRepository.findById(movieId)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        List<Director> list = new ArrayList<>(movie.getDirectors());
+        return directorMapper.directorsToStrings(list);
+    }
+
+    @PreAuthorize("isAuthenticated")
+    public List<CountryResponse> countryByMovie(String movieId) {
+        Movie movie = movieCallRepository.findById(movieId)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        List<Country> list = new ArrayList<>(movie.getCountries());
+        return countryMapper.toCountryResponse(list);
+    }
+
 
 }

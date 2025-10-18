@@ -1,10 +1,10 @@
 package com.example.ApiUser.controller.Authentication;
 
 import com.example.ApiUser.dto.request.authentication.token.IntrospectRequest;
-import com.example.ApiUser.dto.request.authentication.users.LogoutRequest;
 import com.example.ApiUser.dto.request.authentication.token.RefreshTokenRequest;
-import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.request.authentication.users.AuthenticationRequest;
+import com.example.ApiUser.dto.request.authentication.users.LogoutRequest;
+import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.authentication.AuthenticationResponse;
 import com.example.ApiUser.dto.response.authentication.IntrospectResponse;
 import com.example.ApiUser.entity.authentication.users.EmailVerificationToken;
@@ -18,7 +18,6 @@ import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

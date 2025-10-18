@@ -14,7 +14,7 @@ public interface ActorMapper {
     default List<String> actorsToStrings(List<Actor> actors) {
         if (actors == null) return null;
         return actors.stream()
-                .map(Actor::getName)  // Giả sử Actor có getName(), chỉnh nếu khác
+                .map(Actor::getName)
                 .collect(Collectors.toList());
     }
 }

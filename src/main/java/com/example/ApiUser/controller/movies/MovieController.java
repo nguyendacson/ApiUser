@@ -3,6 +3,8 @@ package com.example.ApiUser.controller.movies;
 import com.example.ApiUser.dto.request.movies.MovieFilterRequest;
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.callMovies.CategoryResponse;
+import com.example.ApiUser.dto.response.callMovies.CountryResponse;
+import com.example.ApiUser.dto.response.callMovies.EpisodeResponse;
 import com.example.ApiUser.entity.movies.MovieDTO;
 import com.example.ApiUser.service.helper.PaginationHelper;
 import com.example.ApiUser.service.movies.movieService.MovieService;
@@ -78,6 +80,37 @@ public class MovieController {
     ApiResponse<List<MovieDTO>> searchMovie(@RequestParam(required = false) String key) {
         List<MovieDTO> list = movieService.searchMovie(key);
         return ApiResponse.<List<MovieDTO>>builder()
+                .result(list)
+                .build();
+    }
+
+    @PostMapping("/{movieId}/actor")
+    ApiResponse<List<String>> actorByMovie(@PathVariable String movieId) {
+        List<String> list = movieService.actorByMovie(movieId);
+        return ApiResponse.<List<String>>builder()
+                .result(list)
+                .build();
+    }
+
+    @PostMapping("/{movieId}/country")
+    ApiResponse<List<CountryResponse>> countryByMovie(@PathVariable String movieId) {
+        List<CountryResponse> list = movieService.countryByMovie(movieId);
+        return ApiResponse.<List<CountryResponse>>builder()
+                .result(list)
+                .build();
+    }
+
+    @PostMapping("/{movieId}/director")
+    ApiResponse<List<String>> directorByMovie(@PathVariable String movieId) {
+        List<String> list = movieService.directorByMovie(movieId);
+        return ApiResponse.<List<String>>builder()
+                .result(list)
+                .build();
+    }
+    @PostMapping("/{movieId}/episode")
+    ApiResponse<List<EpisodeResponse>> episodeByMovie(@PathVariable String movieId) {
+        List<EpisodeResponse> list = movieService.episodeByMovie(movieId);
+        return ApiResponse.<List<EpisodeResponse>>builder()
                 .result(list)
                 .build();
     }
