@@ -7,16 +7,19 @@ import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.authentication.UserResponse;
 import com.example.ApiUser.service.authentication.users.UserService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +37,11 @@ public class UserController {
                 .message("Please go your Email must verify Email!")
                 .result(userService.createUser(creationRequest))
                 .build();
+    }
+
+    @GetMapping("/login/google")
+    public void redirectToGoogle(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/apiUser/oauth2/authorization/google");
     }
 
     @GetMapping
@@ -126,5 +134,4 @@ public class UserController {
                 .result(result)
                 .build();
     }
-
 }

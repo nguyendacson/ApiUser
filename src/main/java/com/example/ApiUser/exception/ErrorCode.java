@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     USER_OTHER_EXCEPTION(9999, "Unexpected server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_TOKEN_TYPE(8888, "Token not type", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_EXISTED(1001, "User already exists", HttpStatus.CONFLICT),
     EMAIL_EXISTED(1001, "Email already exists", HttpStatus.CONFLICT),
     EMAIL_NOT_EXISTED(1001, "Email not exists", HttpStatus.CONFLICT),
@@ -42,8 +43,7 @@ public enum ErrorCode {
     INVALID_REQUEST(1027, "Invalid Request", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1028, "Invalid Token Email", HttpStatus.BAD_REQUEST),
     TOKEN_EXPIRED(1029, "Token expired", HttpStatus.BAD_REQUEST),
-    ;
-
+    FAIL_VERIFIED_MAIL(1029, "Error when verified with your mail", HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatus statusCode) {
         this.code = code;

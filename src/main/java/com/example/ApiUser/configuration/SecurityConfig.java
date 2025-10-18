@@ -1,6 +1,9 @@
 package com.example.ApiUser.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.ApiUser.service.authentication.CustomOAuth2UserService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,27 +20,26 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    CustomJwtDecoder customJwtDecoder;
+    CustomOAuth2UserService customOAuth2UserService;
+    OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
-    @Autowired
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-    @Autowired
-    private CustomJwtDecoder customJwtDecoder;
-
-    private final String[] PUBLIC_ENDPOINTS = {
+    String[] PUBLIC_ENDPOINTS = {
             "/users",
+            "/users/login/google",
             "/auth/token",
             "/auth/introspect",
             "/api/test/watchlist",
-            "/api/callMovie/createCallData",
-            "/api/callMovie/updateCallData",
             "/auth/logout",
             "/auth/refresh",
             "/auth/verify-email",
             "/auth/forgot-password",
-            "/auth/reset-password"
-
+            "/auth/reset-password",
     };
 
     @Bean
@@ -48,9 +50,16 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .successHandler(oAuth2LoginSuccessHandler)
+                                .failureHandler(oAuth2LoginFailureHandler)
+//                        .defaultSuccessUrl("/apiUser/oauth2/success", true)
+                )
+
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(customJwtDecoder)) // decode JWT
-                        .authenticationEntryPoint(customAuthenticationEntryPoint) // trả về JSON khi 401
+                        .jwt(jwt -> jwt.decoder(customJwtDecoder))
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 );
 
         return http.build();
