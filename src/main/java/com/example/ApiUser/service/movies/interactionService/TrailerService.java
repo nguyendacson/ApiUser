@@ -33,13 +33,13 @@ public class TrailerService {
     public void createTrailer(String movieId, String userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieCallRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         if (trailerRepository.existsByUserAndMovie(user, movie)) {
-            throw new AppException(ErrorCode.USER_MOVIE_EXISTED);
+            throw new AppException(ErrorCode.MOV_USER_EXISTED);
         }
 
         Trailer trailers = Trailer.builder()
@@ -53,22 +53,27 @@ public class TrailerService {
     public void deleteTrailer(String movieId, String userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieCallRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         Trailer trailer = trailerRepository.findByUserAndMovie(user, movie)
-                .orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_LIKE_NOT_FOUND));
 
         trailerRepository.delete(trailer);
     }
 
     public List<MovieDTO> getAllTrailerUser(String userId, Sort sort, String filter) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         List<Trailer> trailers = trailerRepository.findAllByUser(user, sort);
+
+        if (trailers.isEmpty()) {
+            throw new AppException(ErrorCode.MOV_NOT_FOUND);
+        }
+
         return trailers.stream()
                 .map(Trailer::getMovie)
                 .filter(movie -> filter == null || filter.isEmpty() || filter.equals(movie.getType()))

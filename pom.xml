@@ -35,6 +35,7 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <kotlin.version>2.2.0</kotlin.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,6 +44,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+            <version>1.1.0-M3</version>
         </dependency>
 
         <!--add plugin-->
@@ -154,8 +161,37 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>com.google.genai</groupId>-->
+<!--            <artifactId>google-genai</artifactId>-->
+<!--            <version>1.23.0</version>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>io.qdrant</groupId>
+            <artifactId>client</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>1.23.0</version>
+        </dependency>
 
 
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-bom</artifactId>
+            <version>1.0.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
 
     </dependencies>
 

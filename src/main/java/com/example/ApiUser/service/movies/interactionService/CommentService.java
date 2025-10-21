@@ -37,17 +37,17 @@ public class CommentService {
 
     public void createComment(CreateCommentRequest commentRequest, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieCallRepository.findById(commentRequest.getMovieId())
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime enbOfDay = startOfDay.plusDays(1).minusNanos(1);
 
         long count = commentRepository.countByUserAndMovieAndCreatedAtBetween(user, movie, startOfDay, enbOfDay);
         if (count > 5) {
-            throw new AppException(ErrorCode.EXCEEDED_COMMENT);
+            throw new AppException(ErrorCode.MOV_EXCEEDED_COMMENT);
         }
 
         Comment comments = commentMapper.toComment(commentRequest);
@@ -60,26 +60,26 @@ public class CommentService {
 
     public void deleteComment(String commentId, String userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_COMMENT_NOT_FOUND));
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USR_UNAUTHENTICATED);
         }
         commentRepository.delete(comment);
     }
 
     public void updateComment(UpdateCommentRequest updateCommentRequest, String userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Comment comments = commentRepository.findById(updateCommentRequest.getCommentId())
-                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_COMMENT_NOT_FOUND));
 
         if (!comments.getUser().getId().equals(userId)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USR_UNAUTHENTICATED);
         }
 
         comments.setContent(updateCommentRequest.getNewContent());
@@ -88,11 +88,11 @@ public class CommentService {
 
     public List<CommentResponse> allCommentByMovie(String movieId, Sort sort, String currentUserId) {
         Movie movie = movieCallRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         List<Comment> comments = commentRepository.findAllByMovie(movie, sort);
         if (comments.isEmpty()) {
-            throw new AppException(ErrorCode.MOVIE_NOT_COMMENT);
+            throw new AppException(ErrorCode.MOV_NOT_COMMENTABLE);
         }
 
         return comments.stream()

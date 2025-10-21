@@ -1,7 +1,6 @@
-package com.example.ApiUser.configuration;
+package com.example.ApiUser.configuration.halder;
 
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
-import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -22,7 +21,7 @@ public class OAuth2LoginFailureHandler implements AuthenticationFailureHandler {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 
-        ErrorCode errorCode = ErrorCode.FAIL_VERIFIED_MAIL;
+        ErrorCode errorCode = ErrorCode.TKN_VERIFICATION_FAILED;
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(errorCode.getCode())

@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.authentication;
+package com.example.ApiUser.service.authentication.roleToken;
 
 import com.example.ApiUser.dto.request.authentication.token.PermissionRequest;
 import com.example.ApiUser.dto.response.authentication.PermissionResponse;
@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,19 +22,20 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
-    public PermissionResponse create(PermissionRequest request){
+    @PreAuthorize("hasRole('ADMIN')")
+    public PermissionResponse createPermission(PermissionRequest request){
         Permission permission = permissionMapper.toPermission(request);
         permission = permissionRepository.save(permission);
         return permissionMapper.toPermissionResponse(permission);
     }
 
-    public List<PermissionResponse> getAll(){
-//        var permissions = permissionRepository.findAll();
-//        return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<PermissionResponse> allPermission(){
         return permissionMapper.toListPermission(permissionRepository.findAll());
     }
 
-    public void delete(String permission){
-        permissionRepository.deleteById(permission);
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deletePermission(String name){
+        permissionRepository.deleteById(name);
     }
 }

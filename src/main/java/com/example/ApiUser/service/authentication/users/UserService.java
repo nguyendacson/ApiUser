@@ -24,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -41,15 +40,16 @@ public class UserService {
     EmailVerificationTokenRepository tokenRepository;
     SendEmailToken sendEmailToken;
 
-
-
     @Transactional
     public UserResponse createUser(UserCreationRequest userCreationRequest) {
         if (userRepository.existsByUsername(userCreationRequest.getUsername()))
-            throw new AppException(ErrorCode.USER_EXISTED);
+            throw new AppException(ErrorCode.USR_EXISTED);
 
-        if (userRepository.existsByEmail(userCreationRequest.getEmail()))
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        String email = userCreationRequest.getEmail();
+        if (email != null && !email.isBlank()) {
+            if (userRepository.existsByEmail(email))
+                throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+        }
 
         User user = userMapper.toUser(userCreationRequest);
         var roles = roleRepository.findAllById(List.of("USER"));
@@ -60,48 +60,37 @@ public class UserService {
 
         user = userRepository.save(user);
 
-        String token = UUID.randomUUID().toString();
-        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(LocalDateTime.now().plusHours(24))
-                .build();
-        tokenRepository.save(verificationToken);
+        if (user.getEmail() != null) {
+            String token = UUID.randomUUID().toString();
+            EmailVerificationToken verificationToken = EmailVerificationToken.builder()
+                    .token(token)
+                    .user(user)
+                    .expiryDate(LocalDateTime.now().plusHours(24))
+                    .build();
+            tokenRepository.save(verificationToken);
 
-        try {
-            sendEmailToken.sendVerificationEmail(user.getEmail(), token);
-        } catch (MessagingException e) {
-            // rollback transaction
-            throw new AppException(ErrorCode.EMAIL_NOT_EXISTED);
+            try {
+                sendEmailToken.sendVerificationEmail(user.getEmail(), token);
+            } catch (MessagingException e) {
+                // rollback transaction
+                throw new AppException(ErrorCode.USR_EMAIL_NOT_FOUND);
+            }
         }
-
         return userMapper.toUserResponse(user);
-    }
-
-    public UserResponse getMyInfo(String userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toUserResponse(user);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-//    @PreAuthorize("hasAuthority('CREATE_PERMISSION1')")
-    public List<UserResponse> getAllUser() {
-        return userMapper.toListUserResponse(userRepository.findAll());
     }
 
     //    @PostAuthorize("returnObject.username == authentication.username")
     @PreAuthorize("hasRole('ADMIN') or #username  == authentication.name")
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         return userMapper.toUserResponse(user);
     }
 
     public UserResponse updateUser(String id, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         userMapper.updateUser(user, userUpdateRequest);
         user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
@@ -125,21 +114,21 @@ public class UserService {
             sendEmailToken.sendVerificationEmail(user.getEmail(), token);
         } catch (MessagingException e) {
             // rollback transaction
-            throw new AppException(ErrorCode.EMAIL_NOT_EXISTED);
+            throw new AppException(ErrorCode.USR_EMAIL_NOT_FOUND);
         }
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public String updateAvatar(String userId, Map<String, String> uploadInfo) throws IOException {
+    public String updateAvatar(String userId, Map<String, String> uploadInfo) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         String imageUrl = uploadInfo.get("secure_url");
         String publicId = uploadInfo.get("public_id");
 
         if (imageUrl == null || publicId == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST);
+            throw new AppException(ErrorCode.TKN_INVALID_REQUEST);
         }
 
         final String KEY_DEFAULT = "k5kfzphu2wjlhfbbmjte";
@@ -157,16 +146,16 @@ public class UserService {
 
     public void forgotPassword(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_EMAIL_NOT_FOUND));
         sendEmailToken.sendPasswordResetEmail(user);
     }
 
-    public void resetPassword(String token, String newPassword){
+    public void resetPassword(String token, String newPassword) {
         EmailVerificationToken emailVerificationToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> new AppException(ErrorCode.TKN_INVALID));
 
         if (emailVerificationToken.getExpiryDate().isBefore(LocalDateTime.now()))
-            throw new AppException(ErrorCode.TOKEN_EXPIRED);
+            throw new AppException(ErrorCode.TKN_EXPIRED);
 
         User user = emailVerificationToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -175,12 +164,12 @@ public class UserService {
         tokenRepository.delete(emailVerificationToken);
     }
 
-    public void changePassword(String userId, UserChangePassword userChangePassword){
+    public void changePassword(String userId, UserChangePassword userChangePassword) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         if (!passwordEncoder.matches(userChangePassword.getPassword(), user.getPassword())) {
-            throw new AppException(ErrorCode.PASSWORD_INVALID);
+            throw new AppException(ErrorCode.USR_PASSWORD_INVALID);
         }
 
         user.setPassword(passwordEncoder.encode(userChangePassword.getNewPassword()));

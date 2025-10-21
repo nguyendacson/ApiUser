@@ -18,5 +18,4 @@ public class UserUpdateRequest {
      String email;
 
      List<String> roles;
-
 }

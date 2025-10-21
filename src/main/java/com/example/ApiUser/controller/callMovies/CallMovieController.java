@@ -1,8 +1,8 @@
 package com.example.ApiUser.controller.callMovies;
 
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
-import com.example.ApiUser.service.callMovies.CallMovieService;
-import com.example.ApiUser.service.callMovies.CallSlugService;
+import com.example.ApiUser.service.admin.callMovies.CallMovieService;
+import com.example.ApiUser.service.admin.callMovies.CallSlugService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

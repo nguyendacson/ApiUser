@@ -1,9 +1,10 @@
-package com.example.ApiUser.service.movies.interactionService.listForYou;
+package com.example.ApiUser.service.movies.interactionService;
 
 import com.example.ApiUser.dto.request.movies.MovieFilterRequest;
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.entity.callMovies.Category;
 import com.example.ApiUser.entity.callMovies.Movie;
+import com.example.ApiUser.entity.movies.ListForYou;
 import com.example.ApiUser.entity.movies.MovieDTO;
 import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
@@ -11,9 +12,11 @@ import com.example.ApiUser.mapper.movies.MovieDTOMapper;
 import com.example.ApiUser.repository.authentication.UserRepository;
 import com.example.ApiUser.repository.movies.MovieCallRepository;
 import com.example.ApiUser.repository.movies.interationMovie.LikeRepository;
+import com.example.ApiUser.repository.movies.interationMovie.ListForYouRepository;
 import com.example.ApiUser.repository.movies.interationMovie.WatchingRepository;
 import com.example.ApiUser.service.helper.BuildSpecificationHelper;
 import com.example.ApiUser.service.redis.RedisServiceImpl;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,13 +25,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,18 +42,41 @@ public class ListForYouService {
     UserRepository userRepository;
     MovieCallRepository movieRepository;
     WatchingRepository watchingRepository;
+    ListForYouRepository listForYouRepository;
     LikeRepository likeRepository;
     MovieDTOMapper movieDTOMapper;
     RedisServiceImpl redisService;
     BuildSpecificationHelper buildSpecificationHelper;
 
+    @Transactional
+    public void refreshAllUsersRecommendations() {
+        log.info("Refreshing recommendations All-User");
 
-    @Async
-    public void refreshRecommendations(String userId) {
+        Set<String> listUserIdRefresh = new HashSet<>();
+        listUserIdRefresh.addAll(likeRepository.findAll().stream()
+                .map(l -> l.getUser().getId()).toList());
+        listUserIdRefresh.addAll(watchingRepository.findAll().stream()
+                .map(w -> w.getUser().getId()).toList());
+
+        for (String userId : listUserIdRefresh) {
+            try {
+                refreshRecommendations(userId);
+            } catch (Exception e) {
+                log.error("❌ Failed refresh for user {}: {}", userId, e.getMessage());
+            }
+        }
+        log.info("✅ Scheduled refresh finished.");
+    }
+
+    private void refreshRecommendations(String userId) {
+        String year = String.valueOf(Year.now().getValue());
+
         try {
-            log.info("Refreshing recommendations for user {}", userId);
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                    .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
+
+            listForYouRepository.deleteAllByUser_Id(userId);
+            listForYouRepository.flush();
 
             List<String> combinedIds = new ArrayList<>();
             combinedIds.addAll(
@@ -65,7 +91,7 @@ public class ListForYouService {
             );
 
             List<Movie> listMovie = combinedIds.isEmpty()
-                    ? movieRepository.findTop50ByYearAndStatusOrderByCreatedDesc("2025", "ongoing")
+                    ? movieRepository.findTop50ByYearAndStatusOrderByCreatedDesc(year, "ongoing")
                     : movieRepository.findAllById(combinedIds);
 
             String mostCommonType = listMovie.stream()
@@ -76,7 +102,7 @@ public class ListForYouService {
                     .orElse(null);
 
             if (mostCommonType == null) {
-                listMovie = movieRepository.findTop50ByYearAndStatusOrderByCreatedDesc("2025", "ongoing");
+                throw new AppException(ErrorCode.MOV_NOT_FOUND);
             }
 
             String mostCommonCategory = listMovie.stream()
@@ -100,22 +126,35 @@ public class ListForYouService {
             String key = "recommendations:";
             redisService.hashSet(key, userId, recommendedMovie);
             redisService.setTimeToLive(key, 7);
-            log.info("Recommendations cached for user {}", userId);
+
+            List<Movie> movies = movieRepository.findAllById(recommendedMovie);
+
+            List<ListForYou> entities = movies.stream()
+                    .map(movie -> ListForYou.builder()
+                            .user(user)
+                            .movie(movie)
+                            .build())
+                    .toList();
+            listForYouRepository.saveAll(entities);
+
         } catch (Exception e) {
             log.error("Failed to refresh recommendations for user {}: {}", userId, e.getMessage());
         }
     }
 
     @PreAuthorize("isAuthenticated")
-//    @SuppressWarnings("unchecked")
     public List<MovieDTO> getRecommendations(MovieFilterRequest filterRequest, String userId, Pageable pageable) {
         String key = "recommendations:";
         Object cached = redisService.hashGet(key, userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Page<Movie> moviePage;
 
         if (cached != null) {
             List<String> cachedIds = new ArrayList<>();
+
             if (cached instanceof List<?>) {
                 for (Object o : (List<?>) cached) {
                     if (o instanceof String s) {
@@ -133,8 +172,21 @@ public class ListForYouService {
                 moviePage = getDefaultMoviesWithFilter(filterRequest, pageable);
             }
         } else {
-            refreshRecommendations(userId);
-            moviePage = getDefaultMoviesWithFilter(filterRequest, pageable);
+            List<ListForYou> listForYous = listForYouRepository.findAllByUser(user);
+
+            if (listForYous != null && !listForYous.isEmpty()) {
+                List<String> movieIds = listForYous.stream()
+                        .map(lfy -> lfy.getMovie().getId())
+                        .toList();
+
+                Specification<Movie> spec = buildSpecificationHelper.buildSpecification(filterRequest)
+                        .and((root, query, cb) -> root.get("id").in(movieIds));
+
+                moviePage = movieRepository.findAll(spec, pageable);
+
+            } else {
+                moviePage = getDefaultMoviesWithFilter(filterRequest, pageable);
+            }
         }
 
         return moviePage.getContent().stream()
@@ -150,30 +202,3 @@ public class ListForYouService {
         return movieRepository.findAll(spec, pageable);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

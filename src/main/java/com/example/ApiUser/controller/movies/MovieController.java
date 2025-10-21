@@ -6,6 +6,8 @@ import com.example.ApiUser.dto.response.callMovies.CategoryResponse;
 import com.example.ApiUser.dto.response.callMovies.CountryResponse;
 import com.example.ApiUser.dto.response.callMovies.EpisodeResponse;
 import com.example.ApiUser.entity.movies.MovieDTO;
+import com.example.ApiUser.exception.AppException;
+import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.service.helper.PaginationHelper;
 import com.example.ApiUser.service.movies.movieService.MovieService;
 import lombok.AccessLevel;
@@ -76,9 +78,12 @@ public class MovieController {
                 .build();
     }
 
-    @PostMapping("/search")
-    ApiResponse<List<MovieDTO>> searchMovie(@RequestParam(required = false) String key) {
+    @PostMapping("/search/{key}")
+    ApiResponse<List<MovieDTO>> searchMovie(@PathVariable(required = false) String key) {
         List<MovieDTO> list = movieService.searchMovie(key);
+        if (list.isEmpty()){
+            throw  new AppException(ErrorCode.MOV_NOT_FOUND);
+        }
         return ApiResponse.<List<MovieDTO>>builder()
                 .result(list)
                 .build();

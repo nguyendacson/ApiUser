@@ -1,9 +1,9 @@
-package com.example.ApiUser.configuration;
+package com.example.ApiUser.configuration.halder;
 
 import com.example.ApiUser.dto.response.authentication.AuthenticationResponse;
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.repository.authentication.UserRepository;
-import com.example.ApiUser.service.authentication.AuthenticationService;
+import com.example.ApiUser.service.authentication.roleToken.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,9 +42,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
 
-        // Sinh JWT token
         var accessToken = authenticationService.generateToken(user);
-        var refreshToken = authenticationService.generateToken(user);
+        var refreshToken = authenticationService.generateRefreshToken(user);
         AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken, true);
 
         // Trả JSON cho client

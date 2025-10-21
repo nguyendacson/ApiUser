@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.authentication;
+package com.example.ApiUser.service.authentication.roleToken;
 
 import com.example.ApiUser.dto.request.authentication.token.RoleRequest;
 import com.example.ApiUser.dto.response.authentication.RoleResponse;
@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -23,16 +24,18 @@ public class RoleService {
     PermissionRepository permissionRepository;
     RoleMapper roleMapper;
 
-    public RoleResponse create(RoleRequest roleRequest){
+    @PreAuthorize("hasRole('ADMIN')")
+    public RoleResponse createRole(RoleRequest roleRequest){
         var role = roleMapper.toRole(roleRequest);
 
         var permissions = permissionRepository.findAllById(roleRequest.getPermissions());
-
         role.setPermissions(new HashSet<>(permissions));
         role = roleRepository.save(role);
+
         return  roleMapper.toRoleResponse(role);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAll(){
         return roleMapper.toListRoleResponse(roleRepository.findAll());
     }

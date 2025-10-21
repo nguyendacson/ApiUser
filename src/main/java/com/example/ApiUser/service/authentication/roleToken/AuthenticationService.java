@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.authentication;
+package com.example.ApiUser.service.authentication.roleToken;
 
 import com.example.ApiUser.dto.request.authentication.token.IntrospectRequest;
 import com.example.ApiUser.dto.request.authentication.token.RefreshTokenRequest;
@@ -23,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,28 +49,26 @@ public class AuthenticationService {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
-    // kiểm tra trạng thái token
     private SignedJWT verifyToken(String token, String expectedType) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        // ✅ Kiểm tra chữ ký
         if (!signedJWT.verify(verifier)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USR_UNAUTHENTICATED);
         }
 
         String type = signedJWT.getJWTClaimsSet().getStringClaim("type");
         if (!Objects.equals(expectedType, type)) {
-            throw new AppException(ErrorCode.INVALID_TOKEN_TYPE);
+            throw new AppException(ErrorCode.SYS_INVALID_TOKEN_TYPE);
         }
 
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (expiryTime.before(new Date())) {
-            throw new AppException(ErrorCode.TOKEN_EXPIRED);
+            throw new AppException(ErrorCode.TKN_EXPIRED);
         }
 
         if (invalidateTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USR_UNAUTHENTICATED);
         }
         return signedJWT;
     }
@@ -77,13 +76,13 @@ public class AuthenticationService {
     // đăng nhập và tạo token
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         var user = userRepository.findByUsername(authenticationRequest.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         boolean authenticationRequested = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
         if (!authenticationRequested)
-            throw new AppException(ErrorCode.AUTH_NOT_EXISTED);
+            throw new AppException(ErrorCode.USR_AUTH_TOKEN_MISSING);
 
         var accessToken = generateToken(user);
         var refreshToken = generateRefreshToken(user);
@@ -104,7 +103,7 @@ public class AuthenticationService {
                 .issuer("SonND.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(12, ChronoUnit.HOURS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("userId", user.getId())
@@ -150,7 +149,6 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
     }
-
 
     // tạo role
     private String buildScope(User user) {
@@ -204,25 +202,15 @@ public class AuthenticationService {
                 .build();
     }
 
-    // làm mới token
     public AuthenticationResponse refreshToken(RefreshTokenRequest request)
             throws ParseException, JOSEException {
 
         SignedJWT signedJWT = verifyToken(request.getToken(), "refresh");
 
-//        var jit = signedJWT.getJWTClaimsSet().getJWTID();
-//        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-//
-//        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-//                .id(jit)
-//                .expiryTime(expiryTime)
-//                .build();
-//        invalidateTokenRepository.save(invalidatedToken);
-
         var username = signedJWT.getJWTClaimsSet().getSubject();
 
         var user = userRepository.findByUsername(username).orElseThrow(
-                () -> new AppException(ErrorCode.UNAUTHENTICATED)
+                () -> new AppException(ErrorCode.USR_UNAUTHENTICATED)
         );
 
         var newAccessToken = generateToken(user);

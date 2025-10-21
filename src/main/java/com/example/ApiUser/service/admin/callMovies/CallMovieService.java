@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.callMovies;
+package com.example.ApiUser.service.admin.callMovies;
 
 import com.example.ApiUser.dto.response.callMovies.ApiMovieResponse;
 import com.example.ApiUser.dto.response.callMovies.DataMovieResponse;
