@@ -1,7 +1,7 @@
 package com.example.ApiUser;
 
 import com.cloudinary.Cloudinary;
-import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -18,9 +18,9 @@ public class ApiUserApplication {
     }
 
     @Bean
-    public Cloudinary cloudinary() {
-        Dotenv dotenv = Dotenv.load();
-        String cloudinaryUrl = dotenv.get("CLOUDINARY_URL");
+    public Cloudinary cloudinary(@Value("${CLOUDINARY_URL}") String cloudinaryUrl) {
+//        Dotenv dotenv = Dotenv.load();
+//        String cloudinaryUrl = @Value("${CLOUDINARY_URL}");
         return new Cloudinary(cloudinaryUrl);
     }
 }

@@ -46,7 +46,7 @@ public class AuthenticationService {
     InvalidateTokenRepository invalidateTokenRepository;
 
     @NonFinal
-    @Value("${jwt.signerKey}")
+    @Value("${KEY_TOKEN}")
     protected String SIGNER_KEY;
 
     private SignedJWT verifyToken(String token, String expectedType) throws JOSEException, ParseException {
