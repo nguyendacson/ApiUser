@@ -1,0 +1,61 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /apiUser
+
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/apiUser_service"
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  redis:
+    host: localhost
+    port: 6379
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000
+      cache-null-values: false
+
+  ai:
+    openai:
+      api-key: ${GEMINI_KEY}
+      chat:
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${USER_NAME_MAIL}
+    password: ${PASS_MAIL}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+jwt:
+  signerKey: ${KEY_TOKEN}
