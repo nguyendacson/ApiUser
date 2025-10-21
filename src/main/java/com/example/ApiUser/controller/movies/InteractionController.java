@@ -15,8 +15,8 @@ import com.example.ApiUser.service.movies.interactionService.CommentService;
 import com.example.ApiUser.service.movies.interactionService.LikeService;
 import com.example.ApiUser.service.movies.interactionService.MyListService;
 import com.example.ApiUser.service.movies.interactionService.TrailerService;
-import com.example.ApiUser.service.movies.interactionService.listForYou.ListForYouService;
-import com.example.ApiUser.service.movies.interactionService.watching.WatchingService;
+import com.example.ApiUser.service.movies.interactionService.ListForYouService;
+import com.example.ApiUser.service.movies.interactionService.WatchingService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -61,7 +61,6 @@ public class InteractionController {
                                     @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getClaimAsString("userId");
         likeService.deleteLike(movieId, userId);
-        listForYouService.refreshRecommendations(userId);
         return ApiResponse.<String>builder()
                 .result("Like canceled!")
                 .build();
@@ -123,7 +122,7 @@ public class InteractionController {
                                      @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getClaimAsString("userId");
         if (userId == null) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.USR_UNAUTHENTICATED);
         }
         commentService.createComment(commentRequest, userId);
 
@@ -174,7 +173,6 @@ public class InteractionController {
                                         @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getClaimAsString("userId");
         watchingService.createWatching(watchingCreateRequest, userId);
-        listForYouService.refreshRecommendations(userId);
         return ApiResponse.<String>builder()
                 .result("Add success")
                 .build();

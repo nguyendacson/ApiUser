@@ -1,7 +1,7 @@
 package com.example.ApiUser.configuration;
 
 import com.example.ApiUser.dto.request.authentication.token.IntrospectRequest;
-import com.example.ApiUser.service.authentication.AuthenticationService;
+import com.example.ApiUser.service.authentication.roleToken.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +47,6 @@ public class CustomJwtDecoder implements JwtDecoder {
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
-//        System.out.println(nimbusJwtDecoder);
 
         return nimbusJwtDecoder.decode(token);
     }

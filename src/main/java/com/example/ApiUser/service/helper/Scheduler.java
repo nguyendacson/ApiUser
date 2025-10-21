@@ -1,9 +1,9 @@
 package com.example.ApiUser.service.helper;
 
-
 import com.example.ApiUser.service.authentication.cloudinary.CloudinaryCleanupService;
 import com.example.ApiUser.service.authentication.users.UserService;
-import com.example.ApiUser.service.movies.interactionService.watching.WatchingService;
+import com.example.ApiUser.service.movies.interactionService.ListForYouService;
+import com.example.ApiUser.service.movies.interactionService.WatchingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +19,7 @@ public class Scheduler {
     WatchingService watchingService;
     CloudinaryCleanupService cloudinaryCleanupService;
     UserService userService;
+    ListForYouService listForYouService;
 
     //    @PostConstruct   // chạy ngay lập tức
 //    @Scheduled(cron = "0 30 23 * * *")
@@ -30,7 +31,6 @@ public class Scheduler {
         watchingService.deleteOldWatchingList();
     }
 
-
     @Scheduled(cron = "0 0 0 1 1,2 *")
     public void cleanupAvatarAuto() {
         log.info("Start clean data Avatar last ...");
@@ -41,5 +41,11 @@ public class Scheduler {
     public void cleanupTokenEmailAuto() {
         log.info("Start clean data Token Email ...");
         userService.deleteOldWatchingList();
+    }
+
+    @Scheduled(cron = "0 0 */12 * * *")
+    public void refreshListForYou() {
+        log.info("Start clean end refresh data list-for-you ...");
+        listForYouService.refreshAllUsersRecommendations();
     }
 }

@@ -1,6 +1,10 @@
-package com.example.ApiUser.configuration;
+package com.example.ApiUser.configuration.config;
 
-import com.example.ApiUser.service.authentication.CustomOAuth2UserService;
+import com.example.ApiUser.configuration.CustomJwtDecoder;
+import com.example.ApiUser.configuration.halder.CustomAuthenticationEntryPoint;
+import com.example.ApiUser.configuration.halder.OAuth2LoginFailureHandler;
+import com.example.ApiUser.configuration.halder.OAuth2LoginSuccessHandler;
+import com.example.ApiUser.service.authentication.users.CustomOAuth2UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,13 +34,10 @@ public class SecurityConfig {
     OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     String[] PUBLIC_ENDPOINTS = {
+            "/auth/login",
+            "/auth/refresh-token",
+            "/auth/login/google",
             "/users",
-            "/users/login/google",
-            "/auth/token",
-            "/auth/introspect",
-            "/api/test/watchlist",
-            "/auth/logout",
-            "/auth/refresh",
             "/auth/verify-email",
             "/auth/forgot-password",
             "/auth/reset-password",

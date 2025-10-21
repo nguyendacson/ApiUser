@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.authentication;
+package com.example.ApiUser.service.authentication.users;
 
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.exception.AppException;
@@ -33,12 +33,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String email = googleUser.getAttribute("email");
         if (userRepository.existsByEmail(email)) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+            throw new AppException(ErrorCode.USR_EXISTED);
         }
 
         Boolean status = googleUser.getAttribute("email_verified");
         if (Boolean.FALSE.equals(status)) {
-            throw new AppException(ErrorCode.FAIL_VERIFIED_MAIL);
+            throw new AppException(ErrorCode.TKN_VERIFICATION_FAILED);
         }
 
         var roles = new HashSet<>(roleRepository.findAllById(Set.of("USER")));

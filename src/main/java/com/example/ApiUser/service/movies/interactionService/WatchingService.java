@@ -1,4 +1,4 @@
-package com.example.ApiUser.service.movies.interactionService.watching;
+package com.example.ApiUser.service.movies.interactionService;
 
 import com.example.ApiUser.dto.request.movies.WatchingRequest;
 import com.example.ApiUser.dto.response.movies.WatchingResponse;
@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,10 +36,12 @@ public class WatchingService {
     WatchingRepository watchingRepository;
 
     public List<WatchingResponse> allWatchingByUser(String userId, String filter) {
-        List<Watching> listWatching = watchingRepository.findByUserId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
-        if (!watchingRepository.existsByUser_Id(userId)) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        List<Watching> listWatching = watchingRepository.findAllByUser(user);
+        if (listWatching.isEmpty()){
+            throw new AppException(ErrorCode.MOV_NOT_FOUND);
         }
 
         return listWatching.stream()
@@ -54,16 +57,16 @@ public class WatchingService {
 
     public void createWatching(WatchingRequest request, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         DataMovie dataMovie = dataMovieRepository.findById(request.getDataMovieId())
-                .orElseThrow(() -> new AppException(ErrorCode.DATA_MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_DATA_NOT_FOUND));
 
         if (watchingRepository.existsByUserAndMovieAndDataMovie(user, movie, dataMovie)) {
-            throw new AppException(ErrorCode.USER_DATA_MOVIE_EXISTED);
+            throw new AppException(ErrorCode.MOV_USER_DATA_EXISTED);
         }
 
         Watching watching = Watching.builder()

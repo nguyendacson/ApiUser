@@ -13,8 +13,9 @@ import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.repository.authentication.UserRepository;
 import com.example.ApiUser.repository.authentication.users.EmailVerificationTokenRepository;
-import com.example.ApiUser.service.authentication.AuthenticationService;
+import com.example.ApiUser.service.authentication.roleToken.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 
@@ -34,13 +36,18 @@ public class AuthenticationController {
     EmailVerificationTokenRepository tokenRepository;
     UserRepository userRepository;
 
-    @PostMapping("/token")
+    @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticationResponseApiResponse(@RequestBody @Valid AuthenticationRequest authenticationRequest) {
         var result = authenticationService.authenticate(authenticationRequest);
         return ApiResponse.<AuthenticationResponse>builder()
                 .message("Login Success")
                 .result(result)
                 .build();
+    }
+
+    @GetMapping("/login/google")
+    public void redirectToGoogle(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/apiUser/oauth2/authorization/google");
     }
 
     @PostMapping("/introspect")
@@ -52,15 +59,15 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/logout")
-    ApiResponse<Void> logout(@RequestBody LogoutRequest logoutRequest)
-            throws ParseException, JOSEException {
+    @PostMapping("/log-out")
+    ApiResponse<String> logout(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
         authenticationService.logout(logoutRequest);
-        return ApiResponse.<Void>builder()
+        return ApiResponse.<String>builder()
+                .result("Login Success")
                 .build();
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/refresh-token")
     ApiResponse<AuthenticationResponse> refreshResponseApiResponse(@RequestBody RefreshTokenRequest refreshTokenRequest)
             throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(refreshTokenRequest);
@@ -72,10 +79,10 @@ public class AuthenticationController {
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         EmailVerificationToken verification = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+                .orElseThrow(() -> new AppException(ErrorCode.TKN_INVALID));
 
         if (verification.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.TOKEN_EXPIRED);
+            throw new AppException(ErrorCode.TKN_EXPIRED);
         }
 
         User user = verification.getUser();

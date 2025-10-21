@@ -3,7 +3,7 @@ package com.example.ApiUser.controller.Authentication;
 import com.example.ApiUser.dto.request.authentication.token.RoleRequest;
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.authentication.RoleResponse;
-import com.example.ApiUser.service.authentication.RoleService;
+import com.example.ApiUser.service.authentication.roleToken.RoleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/role")
+@RequestMapping("/roles")
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -23,7 +23,7 @@ public class RoleController {
     @PostMapping
     public ApiResponse<RoleResponse> createRole(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
-                .result(roleService.create(request))
+                .result(roleService.createRole(request))
                 .build();
     }
 
@@ -34,7 +34,7 @@ public class RoleController {
                 .build();
     }
 
-    @DeleteMapping("/{role}")
+    @DeleteMapping("/roles/{role}")
     public ApiResponse<Void> deleteRole(@PathVariable String role) {
         roleService.delete(role);
         return ApiResponse.<Void>builder().build();

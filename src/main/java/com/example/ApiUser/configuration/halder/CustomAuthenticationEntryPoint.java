@@ -1,4 +1,4 @@
-package com.example.ApiUser.configuration;
+package com.example.ApiUser.configuration.halder;
 
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.exception.ErrorCode;
@@ -25,7 +25,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
         response.setContentType("application/json");
 
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        ErrorCode errorCode = ErrorCode.USR_UNAUTHENTICATED;
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(errorCode.getCode())

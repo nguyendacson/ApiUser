@@ -32,13 +32,13 @@ public class LikeService {
     public void createLike(String movieId, String userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieCallRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         if (likeRepository.existsByUserAndMovie(user, movie)) {
-            throw new AppException(ErrorCode.USER_MOVIE_EXISTED);
+            throw new AppException(ErrorCode.MOV_USER_EXISTED);
         }
 
         Likes likes = Likes.builder()
@@ -52,25 +52,26 @@ public class LikeService {
     public void deleteLike(String movieId, String userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieCallRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         Likes likes = likeRepository.findByUserAndMovie(user, movie)
-                .orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_LIKE_NOT_FOUND));
 
         likeRepository.delete(likes);
     }
 
     public List<MovieDTO> getAllLikeByUser(String userId, Sort sort) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         List<Likes> likes = likeRepository.findAllByUser(user, sort);
         if (likes.isEmpty()) {
-            throw new AppException(ErrorCode.LIKE_NOT_EXISTED);
+            throw new AppException(ErrorCode.MOV_LIKE_NOT_FOUND);
         }
+
         return likes.stream()
                 .map(Likes::getMovie)
                 .map(movieDTOMapper::toDTO)

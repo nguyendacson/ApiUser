@@ -7,20 +7,15 @@ import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.authentication.UserResponse;
 import com.example.ApiUser.service.authentication.users.UserService;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 @RequestMapping("users")
@@ -39,32 +34,10 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/login/google")
-    public void redirectToGoogle(HttpServletResponse response) throws IOException {
-        response.sendRedirect("/apiUser/oauth2/authorization/google");
-    }
-
-    @GetMapping
-    ApiResponse<List<UserResponse>> getAllUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getAllUser())
-                .build();
-    }
-
-    @GetMapping("/myAccount")
-    ApiResponse<UserResponse> getUserId(@AuthenticationPrincipal Jwt jwt) {
-
-        String userId = jwt.getClaimAsString("userId");
-
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getUser(userId))
-                .build();
-    }
-
     @GetMapping("/myInfo")
     ApiResponse<UserResponse> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
         return ApiResponse.<UserResponse>builder()
-                .result(userService.getMyInfo(jwt.getClaimAsString("userId")))
+                .result(userService.getUser(jwt.getClaimAsString("userId")))
                 .build();
     }
 
@@ -75,6 +48,19 @@ public class UserController {
         String userId = jwt.getClaimAsString("userId");
 
         return userService.updateUser(userId, userUpdateRequest);
+    }
+
+    @PutMapping("/avatar")
+    ApiResponse<String> updateAvatar(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody Map<String, String> uploadInfo) {
+
+        String userId = jwt.getClaimAsString("userId");
+        String result = userService.updateAvatar(userId, uploadInfo);
+
+        return ApiResponse.<String>builder()
+                .result(result)
+                .build();
     }
 
     @PostMapping("/forgot-password")
@@ -90,7 +76,6 @@ public class UserController {
                 .result("Reset password success")
                 .build();
     }
-
 
     @PostMapping("/reset-password")
     ApiResponse<String> resetPassword(@RequestParam String token,
@@ -113,25 +98,10 @@ public class UserController {
 
     @DeleteMapping("/delete")
     ApiResponse<String> deleteUser(@AuthenticationPrincipal Jwt jwt) {
-
         userService.deleteUser(jwt.getClaimAsString("userId"));
 
         return ApiResponse.<String>builder()
                 .result("You has been deleted My Account!")
-                .build();
-    }
-
-    @PutMapping("/avatar")
-    ApiResponse<String> updateAvatar(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestBody Map<String, String> uploadInfo) throws IOException {
-
-        String userId = jwt.getClaimAsString("userId");
-
-        String result = userService.updateAvatar(userId, uploadInfo);
-
-        return ApiResponse.<String>builder()
-                .result(result)
                 .build();
     }
 }

@@ -32,13 +32,13 @@ public class MyListService {
 
     public void createMyList(String movieId, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         if (myListRepository.existsByUserAndMovie(user, movie)) {
-            throw new AppException(ErrorCode.MYLIST_EXISTED);
+            throw new AppException(ErrorCode.LST_EXISTED);
         }
 
         MyList myList = MyList.builder()
@@ -50,21 +50,25 @@ public class MyListService {
 
     public void deleteMyList(String movieId, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         MyList myList = myListRepository.findByUserAndMovie(user, movie)
-                .orElseThrow(() -> new AppException(ErrorCode.MYLIST_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.LST_NOT_FOUND));
 
         myListRepository.delete(myList);
     }
 
     public List<MovieDTO> allMyLists(String userId, Sort sort) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
+
         List<MyList> myLists = myListRepository.findAllByUser(user, sort);
+        if (myLists.isEmpty()) {
+            throw new AppException(ErrorCode.MOV_NOT_FOUND);
+        }
 
         return myLists.stream()
                 .map(MyList::getMovie)
@@ -72,30 +76,3 @@ public class MyListService {
                 .collect(Collectors.toList());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

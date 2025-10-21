@@ -35,8 +35,8 @@ public class GlobalExceptionHandler {
 
         ApiResponse<?> apiResponse = new ApiResponse<>();
 
-        apiResponse.setCode(ErrorCode.USER_OTHER_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.USER_OTHER_EXCEPTION.getMessage());
+        apiResponse.setCode(ErrorCode.SYS_UNEXPECTED_ERROR.getCode());
+        apiResponse.setMessage(ErrorCode.SYS_UNEXPECTED_ERROR.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
 
         String enumKey = Objects.requireNonNull(methodArgumentNotValidException.getFieldError()).getDefaultMessage();
 
-        ErrorCode errorCode = ErrorCode.INVALID_ENUM_KEY;
+        ErrorCode errorCode = ErrorCode.USR_INVALID_ENUM_KEY;
         Map<String, Objects> attributes = null;
         try {
             errorCode = ErrorCode.valueOf(enumKey);
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
         String enumKey = Objects.requireNonNull(parseException.getMessage());
         ApiResponse<?> apiResponse = new ApiResponse<>();
 
-        ErrorCode errorCode = ErrorCode.JWT_TOKEN_NOT_VALID;
+        ErrorCode errorCode = ErrorCode.USR_JWT_INVALID;
 
         try {
             errorCode = ErrorCode.valueOf(enumKey);
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse<?>> handAccessDeniedException(){
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        ErrorCode errorCode = ErrorCode.USR_UNAUTHENTICATED;
         return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     ResponseEntity<ApiResponse<?>> DataIntegrityViolationException(){
-        ErrorCode errorCode = ErrorCode.MYSQL;
+        ErrorCode errorCode = ErrorCode.SYS_DATABASE_ERROR;
         return ResponseEntity.status(errorCode.getStatusCode()).body(ApiResponse.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
