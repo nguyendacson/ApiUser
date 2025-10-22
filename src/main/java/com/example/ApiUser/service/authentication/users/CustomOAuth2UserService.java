@@ -1,8 +1,6 @@
 package com.example.ApiUser.service.authentication.users;
 
 import com.example.ApiUser.entity.authentication.users.User;
-import com.example.ApiUser.exception.AppException;
-import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.repository.authentication.RoleRepository;
 import com.example.ApiUser.repository.authentication.UserRepository;
 import lombok.AccessLevel;
@@ -32,27 +30,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2User googleUser = new DefaultOAuth2UserService().loadUser(userRequest);
 
         String email = googleUser.getAttribute("email");
-        if (userRepository.existsByEmail(email)) {
-            throw new AppException(ErrorCode.USR_EXISTED);
+
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            var roles = new HashSet<>(roleRepository.findAllById(Set.of("USER")));
+
+            user = User.builder()
+                    .roles(roles)
+                    .name(googleUser.getName())
+                    .username(email)
+                    .email(email)
+                    .provider("Google")
+                    .emailVerified(true)
+                    .avatar(googleUser.getAttribute("picture"))
+                    .build();
+            userRepository.save(user);
+        } else {
+            return googleUser;
         }
-
-        Boolean status = googleUser.getAttribute("email_verified");
-        if (Boolean.FALSE.equals(status)) {
-            throw new AppException(ErrorCode.TKN_VERIFICATION_FAILED);
-        }
-
-        var roles = new HashSet<>(roleRepository.findAllById(Set.of("USER")));
-
-        User u = User.builder()
-                .roles(roles)
-                .name(googleUser.getName())
-                .username(email)
-                .email(email)
-                .provider("Google")
-                .emailVerified(true)
-                .avatar(googleUser.getAttribute("picture"))
-                .build();
-        userRepository.save(u);
 
         return googleUser;
     }

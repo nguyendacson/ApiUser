@@ -19,8 +19,6 @@ public class ApiUserApplication {
 
     @Bean
     public Cloudinary cloudinary(@Value("${CLOUDINARY_URL}") String cloudinaryUrl) {
-//        Dotenv dotenv = Dotenv.load();
-//        String cloudinaryUrl = @Value("${CLOUDINARY_URL}");
         return new Cloudinary(cloudinaryUrl);
     }
 }

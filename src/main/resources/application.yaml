@@ -5,9 +5,9 @@ server:
 
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:3306/apiUser_service"
-    username: root
-    password: root
+    url: ${DB_URL:jdbc:mysql://13.231.241.149:3306/apiuser_service}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -16,7 +16,7 @@ spring:
     show-sql: true
 
   redis:
-    host: localhost
+    host: ${HOST_REDIS:localhost}
     port: 6379
 
   cache:
@@ -29,8 +29,8 @@ spring:
     openai:
       api-key: ${GEMINI_KEY}
       chat:
-        base-url: https://generativelanguage.googleapis.com
-        completions-path: /v1beta/openai/chat/completions
+        base-url: ${OPENAI_BASE_URL:https://generativelanguage.googleapis.com}
+        completions-path: ${OPENAI_COMPLETIONS_PATH:/v1beta/openai/chat/completions}
         options:
           model: gemini-2.5-flash
 
@@ -58,4 +58,4 @@ spring:
               - profile
 
 jwt:
-  signerKey: ${KEY_TOKEN}
+    signerKey: ${KEY_TOKEN}

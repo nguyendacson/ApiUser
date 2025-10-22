@@ -80,7 +80,7 @@ public class UserService {
     }
 
     //    @PostAuthorize("returnObject.username == authentication.username")
-    @PreAuthorize("hasRole('ADMIN') or #username  == authentication.name")
+    @PreAuthorize("isAuthenticated()")
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));

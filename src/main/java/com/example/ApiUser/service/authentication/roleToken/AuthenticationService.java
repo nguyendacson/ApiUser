@@ -46,11 +46,11 @@ public class AuthenticationService {
     InvalidateTokenRepository invalidateTokenRepository;
 
     @NonFinal
-    @Value("${KEY_TOKEN}")
-    protected String SIGNER_KEY;
+    @Value("${jwt.signerKey}")
+    protected String signerKey;
 
     private SignedJWT verifyToken(String token, String expectedType) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         if (!signedJWT.verify(verifier)) {
@@ -116,7 +116,7 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(signerKey.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot Create Token", e);
@@ -142,7 +142,7 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(signerKey.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot create refresh token", e);
