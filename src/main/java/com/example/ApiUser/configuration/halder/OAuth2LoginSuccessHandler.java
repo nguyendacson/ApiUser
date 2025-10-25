@@ -1,8 +1,8 @@
 package com.example.ApiUser.configuration.halder;
 
+import com.example.ApiUser.configuration.config.CustomOAuth2UserPrincipal;
 import com.example.ApiUser.dto.response.authentication.AuthenticationResponse;
 import com.example.ApiUser.entity.authentication.users.User;
-import com.example.ApiUser.repository.authentication.UserRepository;
 import com.example.ApiUser.service.authentication.roleToken.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -22,20 +21,15 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
-
     AuthenticationService authenticationService;
-    UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-        OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String email = oauthUser.getAttribute("email");
-
-        User user = userRepository.findByEmailWithRolesAndPermissions(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        CustomOAuth2UserPrincipal principal = (CustomOAuth2UserPrincipal) authentication.getPrincipal();
+        User user = principal.getUser();
 
         if (!Objects.equals(user.getProvider(), "Google")) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid provider");

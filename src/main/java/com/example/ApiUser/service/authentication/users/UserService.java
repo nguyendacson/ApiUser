@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -92,29 +93,39 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
-        userMapper.updateUser(user, userUpdateRequest);
-        user.setPassword(passwordEncoder.encode(userUpdateRequest.getPassword()));
-
-        if (userUpdateRequest.getRoles() != null) {
-            var roles = roleRepository.findAllById(
-                    userUpdateRequest.getRoles().stream().filter(Objects::nonNull).toList()
-            );
-            user.setRoles(new HashSet<>(roles));
+        if (!passwordEncoder.matches(userUpdateRequest.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.USR_PASSWORD_NOT_FOUND);
         }
 
-        String token = UUID.randomUUID().toString();
-        EmailVerificationToken verificationToken = EmailVerificationToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(LocalDateTime.now().plusHours(24))
-                .build();
-        tokenRepository.save(verificationToken);
+        boolean check = false;
+        if (StringUtils.hasText(user.getEmail())) {
+            boolean emailChanged = !Objects.equals(user.getEmail(), userUpdateRequest.getEmail());
+            if (emailChanged && userRepository.existsByEmail(userUpdateRequest.getEmail())) {
+                throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+            }
+            check = true;
+        } else {
+            if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
+                throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+            }
+        }
 
-        try {
-            sendEmailToken.sendVerificationEmail(user.getEmail(), token);
-        } catch (MessagingException e) {
-            // rollback transaction
-            throw new AppException(ErrorCode.USR_EMAIL_NOT_FOUND);
+        userMapper.updateUser(user, userUpdateRequest);
+
+        if (check) {
+            String token = UUID.randomUUID().toString();
+            EmailVerificationToken verificationToken = EmailVerificationToken.builder()
+                    .token(token)
+                    .user(user)
+                    .expiryDate(LocalDateTime.now().plusHours(24))
+                    .build();
+            tokenRepository.save(verificationToken);
+
+            try {
+                sendEmailToken.sendVerificationEmail(userUpdateRequest.getEmail(), token);
+            } catch (MessagingException e) {
+                throw new AppException(ErrorCode.USR_EMAIL_NOT_FOUND);
+            }
         }
 
         return userMapper.toUserResponse(userRepository.save(user));

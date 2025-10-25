@@ -33,7 +33,7 @@ public class User {
     String avatarPublicId;
     LocalDate dob;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
 
     String provider;     // "local", "google", "facebook", ...

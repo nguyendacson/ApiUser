@@ -1,5 +1,7 @@
 package com.example.ApiUser.service.authentication.users;
 
+import com.example.ApiUser.configuration.config.CustomOAuth2UserPrincipal;
+import com.example.ApiUser.entity.authentication.token.Role;
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.repository.authentication.RoleRepository;
 import com.example.ApiUser.repository.authentication.UserRepository;
@@ -7,11 +9,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -21,35 +22,42 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class CustomOAuth2UserService extends OidcUserService {
     UserRepository userRepository;
     RoleRepository roleRepository;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User googleUser = new DefaultOAuth2UserService().loadUser(userRequest);
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        log.info("VAO LOAD USER ");
+        OidcUser oidcUser = new OidcUserService().loadUser(userRequest);
 
-        String email = googleUser.getAttribute("email");
+        log.info("DATA TRA VE EMAIL{}", oidcUser);
+        String email = oidcUser.getAttribute("email");
 
-        User user = userRepository.findByEmail(email).orElse(null);
+        if (email == null) {
+            throw new OAuth2AuthenticationException("Email not found from OIDC provider");
+        }
 
-        if (user == null) {
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            log.info("Creating new user for email: {}", email);
+
+//            Role userRole = roleRepository.findById("USER")
+//                    .orElseThrow(() -> new OAuth2AuthenticationException("Default role with ID 'USER' not found in database."));
             var roles = new HashSet<>(roleRepository.findAllById(Set.of("USER")));
 
-            user = User.builder()
+            User newUser = User.builder()
                     .roles(roles)
-                    .name(googleUser.getName())
+                    .name(oidcUser.getAttribute("name")) // <-- Sửa ở đây
                     .username(email)
                     .email(email)
                     .provider("Google")
                     .emailVerified(true)
-                    .avatar(googleUser.getAttribute("picture"))
+                    .avatar(oidcUser.getAttribute("picture")) // <-- Sửa ở đây
                     .build();
-            userRepository.save(user);
-        } else {
-            return googleUser;
-        }
 
-        return googleUser;
+            return userRepository.save(newUser);
+        });
+        log.info("===> Authenticated user: {}", user.getEmail());
+        return new CustomOAuth2UserPrincipal(user, oidcUser);
     }
 }

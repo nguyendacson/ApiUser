@@ -15,6 +15,7 @@ public class ApiUserApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ApiUserApplication.class, args);
+//        SpringApplication.run(SpringGoogleOauth2DemoApplication.class, args);
     }
 
     @Bean

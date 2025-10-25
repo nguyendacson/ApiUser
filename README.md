@@ -15,7 +15,7 @@ This project was deployed on domain https://sonnd03.io.vn/... .
 - 🐳 MySQL managed via Docker container
 - ⚙️ Project built with Maven
 - 🧰 Lombok used for cleaner code
-...
+  ...
 
 ---
 

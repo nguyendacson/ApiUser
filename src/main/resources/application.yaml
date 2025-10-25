@@ -1,11 +1,13 @@
 server:
+  forward-headers-strategy: NATIVE
   port: 8080
   servlet:
     context-path: /apiUser
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://13.231.241.149:3306/apiuser_service}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/apiUser_service}
+#    url: jdbc:mysql://13.231.241.149:3306/apiuser_service
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,7 +18,7 @@ spring:
     show-sql: true
 
   redis:
-    host: ${HOST_REDIS:localhost}
+    host: ${HOST_REDIS:redis}
     port: 6379
 
   cache:
@@ -54,8 +56,15 @@ spring:
             client-id: ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
             scope:
+              - openid
               - email
               - profile
+
+logging:
+  level:
+    org.springframework.security.oauth2.client: DEBUG
+    com.example.ApiUser.service.authentication.users.CustomOAuth2UserService: INFO
+
 
 jwt:
     signerKey: ${KEY_TOKEN}

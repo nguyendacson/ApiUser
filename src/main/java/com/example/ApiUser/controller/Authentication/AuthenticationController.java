@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -47,7 +49,9 @@ public class AuthenticationController {
 
     @GetMapping("/login/google")
     public void redirectToGoogle(HttpServletResponse response) throws IOException {
+        log.info("Logh chay vao login google");
         response.sendRedirect("/apiUser/oauth2/authorization/google");
+        log.info("Logh sau khi chay vao login google");
     }
 
     @PostMapping("/introspect")

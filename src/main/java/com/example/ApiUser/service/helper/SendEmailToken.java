@@ -8,7 +8,9 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -24,9 +26,14 @@ public class SendEmailToken {
     EmailVerificationTokenRepository emailVerificationTokenRepository;
     JavaMailSender mailSender;
 
+    @NonFinal
+    @Value("${DOMAIN_APP}")
+    String domainApp;
+
+
     public void sendVerificationEmail(String email, String token) throws MessagingException {
         String subject = "🎬 Verify your Movie SeeMe App account";
-        String verifyUrl = "http://localhost:8080/apiUser/auth/verify-email?token=" + token;
+        String verifyUrl = domainApp + "/apiUser/auth/verify-email?token=" + token;
         String content = """
                 <html>
                 <body style="margin:0; padding:0; background-color:#f5f5f5; font-family: Arial, sans-serif;">

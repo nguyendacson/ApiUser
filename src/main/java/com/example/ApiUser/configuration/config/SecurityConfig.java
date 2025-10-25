@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                                .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOAuth2UserService))
                                 .successHandler(oAuth2LoginSuccessHandler)
                                 .failureHandler(oAuth2LoginFailureHandler)
 //                        .defaultSuccessUrl("/apiUser/oauth2/success", true)
