@@ -23,7 +23,5 @@ public interface UserMapper {
 
     List<UserResponseAdmin> toListUserResponseAdmin(List<User> userList);
 
-    @Mapping(target = "roles", ignore = true)
-    @Mapping(target = "password", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest userUpdateRequest);
 }

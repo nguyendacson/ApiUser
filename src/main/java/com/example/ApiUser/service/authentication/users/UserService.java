@@ -71,6 +71,7 @@ public class UserService {
             tokenRepository.save(verificationToken);
 
             try {
+                log.info("TEST");
                 sendEmailToken.sendVerificationEmail(user.getEmail(), token);
             } catch (MessagingException e) {
                 // rollback transaction
@@ -93,26 +94,31 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
-        if (!passwordEncoder.matches(userUpdateRequest.getPassword(), user.getPassword())) {
-            throw new AppException(ErrorCode.USR_PASSWORD_NOT_FOUND);
-        }
+        String newEmail = userUpdateRequest.getEmail();
+        String oldEmail = user.getEmail();
 
-        boolean check = false;
-        if (StringUtils.hasText(user.getEmail())) {
-            boolean emailChanged = !Objects.equals(user.getEmail(), userUpdateRequest.getEmail());
-            if (emailChanged && userRepository.existsByEmail(userUpdateRequest.getEmail())) {
-                throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
-            }
-            check = true;
-        } else {
-            if (userRepository.existsByEmail(userUpdateRequest.getEmail())) {
-                throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+        boolean shouldSendVerification = false;
+
+        if (StringUtils.hasText(newEmail)) {
+            if (!StringUtils.hasText(oldEmail)) {
+                if (userRepository.existsByEmail(newEmail)) {
+                    throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+                }
+                shouldSendVerification = true;
+            } else {
+                boolean emailChanged = !Objects.equals(oldEmail, newEmail);
+                if (emailChanged) {
+                    if (userRepository.existsByEmail(newEmail)) {
+                        throw new AppException(ErrorCode.USR_EMAIL_EXISTED);
+                    }
+                    shouldSendVerification = true;
+                }
             }
         }
 
         userMapper.updateUser(user, userUpdateRequest);
 
-        if (check) {
+        if (shouldSendVerification) {
             String token = UUID.randomUUID().toString();
             EmailVerificationToken verificationToken = EmailVerificationToken.builder()
                     .token(token)
@@ -122,7 +128,8 @@ public class UserService {
             tokenRepository.save(verificationToken);
 
             try {
-                sendEmailToken.sendVerificationEmail(userUpdateRequest.getEmail(), token);
+                log.info("Gửi mail xác thực cho {}", newEmail);
+                sendEmailToken.sendVerificationEmail(newEmail, token);
             } catch (MessagingException e) {
                 throw new AppException(ErrorCode.USR_EMAIL_NOT_FOUND);
             }
@@ -130,6 +137,7 @@ public class UserService {
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
+
 
     public String updateAvatar(String userId, Map<String, String> uploadInfo) {
         User user = userRepository.findById(userId)
@@ -178,6 +186,14 @@ public class UserService {
     public void changePassword(String userId, UserChangePassword userChangePassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
+
+        if (!StringUtils.hasText(userChangePassword.getPassword())) {
+            throw new AppException(ErrorCode.USR_PASSWORD_REQUIRED);
+        }
+
+        if (!StringUtils.hasText(userChangePassword.getNewPassword())) {
+            throw new AppException(ErrorCode.USR_NEW_PASSWORD_REQUIRED);
+        }
 
         if (!passwordEncoder.matches(userChangePassword.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.USR_PASSWORD_INVALID);

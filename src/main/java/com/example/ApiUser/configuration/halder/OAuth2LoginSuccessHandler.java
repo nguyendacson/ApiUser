@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Component
@@ -38,13 +40,22 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         var accessToken = authenticationService.generateToken(user);
         var refreshToken = authenticationService.generateRefreshToken(user);
-        AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken, true);
 
-        // Trả JSON cho client
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(authResponse));
-        response.getWriter().flush();
+        String redirectUrl = String.format(
+                "movieseeme://auth/callback?accessToken=%s&refreshToken=%s",
+                URLEncoder.encode(accessToken, StandardCharsets.UTF_8),
+                URLEncoder.encode(refreshToken, StandardCharsets.UTF_8)
+        );
+
+        response.sendRedirect(redirectUrl);
+
+//        AuthenticationResponse authResponse = new AuthenticationResponse(accessToken, refreshToken, true);
+//
+//        // Trả JSON cho client
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//        response.getWriter().write(new ObjectMapper().writeValueAsString(authResponse));
+//        response.getWriter().flush();
     }
 }

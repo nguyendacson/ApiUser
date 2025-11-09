@@ -47,7 +47,6 @@ public class InteractionController {
     @PostMapping("/{movieId}/likes")
     ApiResponse<String> likeMovie(@PathVariable String movieId,
                                   @AuthenticationPrincipal Jwt jwt) {
-//      String userId = jwt.getClaimAsString("sub");
         String userId = jwt.getClaimAsString("userId");
         likeService.createLike(movieId, userId);
 

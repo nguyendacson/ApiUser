@@ -87,8 +87,9 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
-    ApiResponse<String> changePassword(@AuthenticationPrincipal Jwt jwt,
-                                       @RequestBody @Valid UserChangePassword userChangePassword) {
+    ApiResponse<String> changePassword(@Valid
+                                       @AuthenticationPrincipal Jwt jwt,
+                                       @RequestBody UserChangePassword userChangePassword) {
         String userId = jwt.getClaimAsString("userId");
         userService.changePassword(userId, userChangePassword);
         return ApiResponse.<String>builder()

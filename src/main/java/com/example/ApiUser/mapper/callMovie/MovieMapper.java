@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface MovieMapper {
+    @Mapping(target = "originName", source = "origin_name")
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "countries", ignore = true)
     @Mapping(target = "directors", ignore = true)
@@ -16,6 +17,7 @@ public interface MovieMapper {
     @Mapping(target = "modified", ignore = true)
     Movie toMovie(MovieCallResponse movieResponse);
 
+    @Mapping(target = "origin_name", source = "originName")
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "countries", ignore = true)
     @Mapping(target = "directors", ignore = true)

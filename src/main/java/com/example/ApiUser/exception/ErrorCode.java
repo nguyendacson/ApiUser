@@ -27,6 +27,8 @@ public enum ErrorCode {
     USR_JWT_INVALID(1010, "Invalid or expired JWT token", HttpStatus.UNAUTHORIZED),
     USR_INVALID_ENUM_KEY(1011, "Invalid enum key", HttpStatus.BAD_REQUEST),
     USR_UNAUTHENTICATED(1012, "Unauthenticated request", HttpStatus.UNAUTHORIZED),
+    USR_PASSWORD_REQUIRED(1013, "Require enter password", HttpStatus.BAD_REQUEST),
+    USR_NEW_PASSWORD_REQUIRED(1014, "Require enter new password", HttpStatus.BAD_REQUEST),
 
     // ====== MOV (Movie & Category) ======
     MOV_NOT_FOUND(2000, "Movie not found", HttpStatus.NOT_FOUND),

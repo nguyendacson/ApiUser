@@ -10,8 +10,6 @@ import com.example.ApiUser.mapper.callMovie.CategoryMapper;
 import com.example.ApiUser.mapper.callMovie.CountryMapper;
 import com.example.ApiUser.mapper.callMovie.DataMovieMapper;
 import com.example.ApiUser.mapper.callMovie.EpisodeMapper;
-import com.example.ApiUser.mapper.movies.MovieDTOMapper;
-import com.example.ApiUser.repository.authentication.UserRepository;
 import com.example.ApiUser.repository.callMovies.*;
 import com.example.ApiUser.repository.movies.MovieCallRepository;
 import lombok.AccessLevel;
@@ -31,12 +29,10 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class CallMovieService {
-    UserRepository userRepository;
     CountryRepository countryRepository;
     CountryMapper countryMapper;
     MovieCallRepository movieRepository;
     MovieMapper movieMapper;
-    MovieDTOMapper movieDTOMapper;
     ActorRepository actorRepository;
     DirectorRepository directorRepository;
     CategoryRepository categoryRepository;
@@ -100,12 +96,15 @@ public class CallMovieService {
         if (apiMovieResponse == null || apiMovieResponse.getMovie() == null) {
             throw new RuntimeException("API không trả dữ liệu movie");
         }
+        log.info("DATA TRA RA NE{}", apiMovieResponse.getMovie().getOrigin_name());
 
         MovieCallResponse movieResponse = apiMovieResponse.getMovie();
 
         Movie movie = mapdataMovie(movieResponse);
 
         Movie saveData = movieRepository.save(movie);
+
+//        saveData.setOrigin_name(movie.getOrigin_name());
 
         Movie finalSaveData = saveData;
 

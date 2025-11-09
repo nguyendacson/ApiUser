@@ -16,9 +16,6 @@ import java.util.List;
 public class UserUpdateRequest {
      String name;
      String username;
-     String password;
      String email;
      LocalDate dob;
-
-     List<String> roles;
 }

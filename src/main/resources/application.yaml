@@ -7,7 +7,6 @@ server:
 spring:
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/apiUser_service}
-#    url: jdbc:mysql://13.231.241.149:3306/apiuser_service
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -64,7 +63,8 @@ logging:
   level:
     org.springframework.security.oauth2.client: DEBUG
     com.example.ApiUser.service.authentication.users.CustomOAuth2UserService: INFO
-
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 jwt:
     signerKey: ${KEY_TOKEN}
