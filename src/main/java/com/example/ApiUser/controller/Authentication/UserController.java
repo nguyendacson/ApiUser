@@ -1,8 +1,6 @@
 package com.example.ApiUser.controller.Authentication;
 
-import com.example.ApiUser.dto.request.authentication.users.UserChangePassword;
-import com.example.ApiUser.dto.request.authentication.users.UserCreationRequest;
-import com.example.ApiUser.dto.request.authentication.users.UserUpdateRequest;
+import com.example.ApiUser.dto.request.authentication.users.*;
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
 import com.example.ApiUser.dto.response.authentication.UserResponse;
 import com.example.ApiUser.service.authentication.users.UserService;
@@ -64,9 +62,9 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    ApiResponse<String> forgotPassword(@RequestParam String email) {
+    ApiResponse<String> forgotPassword(@RequestBody ForgotRequest forgotRequest) {
         try {
-            userService.forgotPassword(email);
+            userService.forgotPassword(forgotRequest);
         } catch (MessagingException e) {
             return ApiResponse.<String>builder()
                     .result("Please check your email must reset Password")
@@ -78,9 +76,8 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    ApiResponse<String> resetPassword(@RequestParam String token,
-                                      @RequestParam String newPassword) {
-        userService.resetPassword(token, newPassword);
+    ApiResponse<String> resetPassword(@RequestBody ResetPassRequest resetPassRequest) {
+        userService.resetPassword(resetPassRequest);
         return ApiResponse.<String>builder()
                 .result("Reset password success, You can login as new Password!")
                 .build();

@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,7 +100,7 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isAuthenticated")
     public List<CategoryResponse> allCategory() {
         return categoryRepository.findAll().stream()
                 .map(categoryMapper::toEntityResponse)
@@ -108,7 +109,21 @@ public class MovieService {
 
     @PreAuthorize("isAuthenticated")
     public List<MovieDTO> allMovieByFilter(MovieFilterRequest filterRequest, Pageable pageable) {
-        Page<Movie> page = movieCallRepository.findAll(buildSpecificationHelper.buildSpecification(filterRequest), pageable);
+        Page<Movie> page = movieCallRepository.findAll(
+                buildSpecificationHelper.buildSpecification(filterRequest),
+                pageable
+        );
+
+        log.info("DATA tacgia: {}", page.map(Movie::getDirectors));
+        page.getContent().forEach(movie ->
+                log.info("Movie: {}, Directors: {}",
+                        movie.getName(),
+                        movie.getDirectors().stream()
+                                .map(Director::getName)
+                                .toList()
+                )
+        );
+
 
         return page.getContent().stream()
                 .map(movieDTOMapper::toDTO)

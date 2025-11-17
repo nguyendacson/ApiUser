@@ -12,7 +12,7 @@ public class BuildSpecificationHelper {
         Specification<Movie> spec = (root, query, cb) -> cb.conjunction();
 
         if (filter.getType() != null) spec = spec.and(MovieSpecifications.hasType(filter.getType()));
-        if (filter.getStatus() != null) spec = spec.and(MovieSpecifications.hasType(filter.getStatus()));
+        if (filter.getStatus() != null) spec = spec.and(MovieSpecifications.hasStatus(filter.getStatus()));
         if (filter.getLang() != null) spec = spec.and(MovieSpecifications.hasLang(filter.getLang()));
         if (filter.getCategory() != null) spec = spec.and(MovieSpecifications.hasCategory(filter.getCategory()));
         if (filter.getCountry() != null) spec = spec.and(MovieSpecifications.hasCountry(filter.getCountry()));

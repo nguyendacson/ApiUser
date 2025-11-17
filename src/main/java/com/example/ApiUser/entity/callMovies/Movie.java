@@ -45,7 +45,8 @@ public class Movie {
     String year;
 
     @JsonProperty("actor")
-    @ManyToMany(fetch = FetchType.EAGER)
+//    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     Set<Actor> actors = new HashSet<>();
 
     @ManyToMany
@@ -56,6 +57,7 @@ public class Movie {
     @JsonProperty("country")
     Set<Country> countries = new HashSet<>();
 
+//    @ManyToMany(fetch = FetchType.EAGER)
     @ManyToMany
     Set<Director> directors = new HashSet<>();
 

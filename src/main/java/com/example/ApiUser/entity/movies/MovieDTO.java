@@ -3,6 +3,8 @@ package com.example.ApiUser.entity.movies;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,4 +24,6 @@ public class MovieDTO {
     String content;
     String year;
     String quality;
+
+    Set<DirectorDTO> directors;
 }

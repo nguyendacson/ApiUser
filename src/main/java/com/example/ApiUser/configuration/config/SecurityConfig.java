@@ -37,10 +37,10 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/refresh-token",
             "/auth/login/google",
-            "/users",
             "/auth/verify-email",
-            "/auth/forgot-password",
-            "/auth/reset-password",
+            "/users",
+            "/users/forgot-password",
+            "/users/reset-password",
     };
 
     @Bean

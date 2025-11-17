@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface ActorMapper {
 
-    @Named("actorsToStrings")  // Qualified method để convert
+//    @Named("actorsToStrings")
     default List<String> actorsToStrings(List<Actor> actors) {
         if (actors == null) return null;
         return actors.stream()

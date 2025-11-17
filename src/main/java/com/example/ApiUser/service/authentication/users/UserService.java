@@ -1,8 +1,6 @@
 package com.example.ApiUser.service.authentication.users;
 
-import com.example.ApiUser.dto.request.authentication.users.UserChangePassword;
-import com.example.ApiUser.dto.request.authentication.users.UserCreationRequest;
-import com.example.ApiUser.dto.request.authentication.users.UserUpdateRequest;
+import com.example.ApiUser.dto.request.authentication.users.*;
 import com.example.ApiUser.dto.response.authentication.UserResponse;
 import com.example.ApiUser.entity.authentication.users.EmailVerificationToken;
 import com.example.ApiUser.entity.authentication.users.User;
@@ -163,21 +161,21 @@ public class UserService {
         return "Updated avatar success";
     }
 
-    public void forgotPassword(String email) throws MessagingException {
-        User user = userRepository.findByEmail(email)
+    public void forgotPassword(ForgotRequest forgotRequest) throws MessagingException {
+        User user = userRepository.findByEmail(forgotRequest.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USR_EMAIL_NOT_FOUND));
         sendEmailToken.sendPasswordResetEmail(user);
     }
 
-    public void resetPassword(String token, String newPassword) {
-        EmailVerificationToken emailVerificationToken = tokenRepository.findByToken(token)
+    public void resetPassword(ResetPassRequest resetPassRequest) {
+        EmailVerificationToken emailVerificationToken = tokenRepository.findByToken(resetPassRequest.getToken())
                 .orElseThrow(() -> new AppException(ErrorCode.TKN_INVALID));
 
         if (emailVerificationToken.getExpiryDate().isBefore(LocalDateTime.now()))
             throw new AppException(ErrorCode.TKN_EXPIRED);
 
         User user = emailVerificationToken.getUser();
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(resetPassRequest.getNewPassword()));
         userRepository.save(user);
 
         tokenRepository.delete(emailVerificationToken);
