@@ -5,6 +5,7 @@ import com.example.ApiUser.dto.response.callMovies.DataMovieResponse;
 import com.example.ApiUser.dto.response.callMovies.EpisodeResponse;
 import com.example.ApiUser.dto.response.callMovies.MovieCallResponse;
 import com.example.ApiUser.entity.callMovies.*;
+import com.example.ApiUser.entity.movies.*;
 import com.example.ApiUser.mapper.callMovie.MovieMapper;
 import com.example.ApiUser.mapper.callMovie.CategoryMapper;
 import com.example.ApiUser.mapper.callMovie.CountryMapper;
@@ -12,6 +13,7 @@ import com.example.ApiUser.mapper.callMovie.DataMovieMapper;
 import com.example.ApiUser.mapper.callMovie.EpisodeMapper;
 import com.example.ApiUser.repository.callMovies.*;
 import com.example.ApiUser.repository.movies.MovieCallRepository;
+import com.example.ApiUser.repository.movies.interationMovie.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +31,12 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class CallMovieService {
+    private final TrailerRepository trailerRepository;
+    private final ListForYouRepository listForYouRepository;
+    private final CommentRepository commentRepository;
+    private final MyListRepository myListRepository;
+    private final LikeRepository likeRepository;
+    private final WatchingRepository watchingRepository;
     CountryRepository countryRepository;
     CountryMapper countryMapper;
     MovieCallRepository movieRepository;
@@ -156,9 +164,26 @@ public class CallMovieService {
             throw new IllegalArgumentException("key Search not null or empty!!!");
         }
 
-        Movie movie = movieRepository.findByName(keySearch)
-                .or(() -> movieRepository.findBySlug(keySearch.trim()))
+        Movie movie = movieRepository.findBySlug(keySearch.trim())
                 .orElseThrow(() -> new RuntimeException("Not found movie with name or slug"));
+
+        List<Watching> watching = watchingRepository.findAllByMovie(movie);
+        watchingRepository.deleteAll(watching);
+
+        List<Likes> likes = likeRepository.findAllByMovie(movie);
+        likeRepository.deleteAll(likes);
+
+        List<MyList> myLists = myListRepository.findAllByMovie(movie);
+        myListRepository.deleteAll(myLists);
+
+        List<Comment> comments = commentRepository.findAllByMovie(movie);
+        commentRepository.deleteAll(comments);
+
+        List<ListForYou> listForYous = listForYouRepository.findAllByMovie(movie);
+        listForYouRepository.deleteAll(listForYous);
+
+        List<Trailer> trailerList = trailerRepository.findAllByMovie(movie);
+        trailerRepository.deleteAll(trailerList);
 
         movieRepository.delete(movie);
     }

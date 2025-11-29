@@ -88,7 +88,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse updateUser(String id, UserUpdateRequest userUpdateRequest) {
+    public void updateUser(String id, UserUpdateRequest userUpdateRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
@@ -133,7 +133,7 @@ public class UserService {
             }
         }
 
-        return userMapper.toUserResponse(userRepository.save(user));
+        userMapper.toUserResponse(userRepository.save(user));
     }
 
 

@@ -12,8 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WatchingResponse {
+    String id;
     Integer progressSeconds;
     LocalDateTime lastWatchedAt;
     String dataMovieId;
+    String dataMovieName;
     MovieDTO movieDTO;
 }

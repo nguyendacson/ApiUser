@@ -3,6 +3,7 @@ package com.example.ApiUser.controller.admin;
 import com.example.ApiUser.dto.response.admin.CountMovie;
 import com.example.ApiUser.dto.response.admin.UserResponseAdmin;
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
+import com.example.ApiUser.dto.response.authentication.UserResponse;
 import com.example.ApiUser.service.admin.AdminService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,24 @@ public class AdminController {
     AdminService adminService;
 
     @GetMapping("/allUser")
-    ApiResponse<List<UserResponseAdmin>> getAllUser() {
-        return ApiResponse.<List<UserResponseAdmin>>builder()
+    ApiResponse<List<UserResponse>> getAllUser() {
+        return ApiResponse.<List<UserResponse>>builder()
                 .result(adminService.getAllUser())
                 .build();
     }
 
-    @PostMapping("/userInfo/{key}")
+    @GetMapping("/userInfo/{key}")
     ApiResponse<UserResponseAdmin> userInfor(@PathVariable String key) {
         return ApiResponse.<UserResponseAdmin>builder()
                 .result(adminService.userInfor(key))
+                .build();
+    }
+
+    @DeleteMapping("/deleteUser/{key}")
+    ApiResponse<String> deleteUser(@PathVariable String key) {
+        adminService.deleteUser(key);
+        return ApiResponse.<String>builder()
+                .result("Delete User has username = " + key)
                 .build();
     }
 

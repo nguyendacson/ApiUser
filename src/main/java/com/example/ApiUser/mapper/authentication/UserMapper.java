@@ -21,7 +21,7 @@ public interface UserMapper {
 
     UserResponseAdmin toUserResponseAdmin(User user);
 
-    List<UserResponseAdmin> toListUserResponseAdmin(List<User> userList);
+    List<UserResponse> toListUserResponse(List<User> userList);
 
     void updateUser(@MappingTarget User user, UserUpdateRequest userUpdateRequest);
 }

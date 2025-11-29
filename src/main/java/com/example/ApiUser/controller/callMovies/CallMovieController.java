@@ -19,7 +19,7 @@ public class CallMovieController {
     CallSlugService callSlugService;
     CallMovieService callMovieService;
 
-    @PostMapping("/createCallData")
+    @GetMapping("/createCallData")
     ApiResponse<String> crawlMovies() {
         try {
             log.info("🚀 Start Create Data Movie...");
@@ -37,8 +37,8 @@ public class CallMovieController {
         }
     }
 
-    @PostMapping("/updateCallData")
-    ResponseEntity<ApiResponse<String>> updateMovies() {
+    @GetMapping("/updateCallData")
+    ApiResponse<String> updateMovies() {
         try {
             log.info("🚀 Start update All Data Movie...");
             callSlugService.updateCallData();
@@ -46,14 +46,14 @@ public class CallMovieController {
                     ApiResponse.<String>builder()
                             .result("Update data movie Success!")
                             .build()
-            );
+            ).getBody();
         } catch (Exception e) {
             log.error("❌ Error when Update movie: ", e);
             return ResponseEntity.internalServerError().body(
                     ApiResponse.<String>builder()
                             .result("Error is: " + e.getMessage())
                             .build()
-            );
+            ).getBody();
         }
     }
 

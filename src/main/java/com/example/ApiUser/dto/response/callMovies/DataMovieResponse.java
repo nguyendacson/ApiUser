@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DataMovieResponse {
+    String id;
     String name;
     String slug;
     String filename;

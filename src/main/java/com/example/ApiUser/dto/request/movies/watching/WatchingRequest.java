@@ -1,4 +1,4 @@
-package com.example.ApiUser.dto.request.movies;
+package com.example.ApiUser.dto.request.movies.watching;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,5 +15,4 @@ public class WatchingRequest {
     String dataMovieId;
     Integer progressSeconds;
     LocalDateTime lastWatchedAt;
-
 }

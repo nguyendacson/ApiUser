@@ -14,6 +14,8 @@ public interface CommentMapper {
     Comment toComment(CreateCommentRequest commentRequest);
 
     @Mapping(target = "user", source = "user.id")
+    @Mapping(target = "name", source = "user.name")
+    @Mapping(target = "avatar", source = "user.avatar")
     @Mapping(target = "movie", source = "movie.id")
     @Mapping(target = "owner", expression = "java(comment.getUser().getId().equals(currentUserId))")
     CommentResponse toCommentResponse(Comment comment, @Context String currentUserId);

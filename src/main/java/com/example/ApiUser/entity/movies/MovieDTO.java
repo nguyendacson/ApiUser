@@ -15,6 +15,8 @@ public class MovieDTO {
     String name;
     String slug;
     String type;
+    String status;
+    String trailer_url;
     String origin_name;
     String poster_url;
     String thumb_url;
@@ -26,4 +28,5 @@ public class MovieDTO {
     String quality;
 
     Set<DirectorDTO> directors;
+    Set<CategoryDTO> categories;
 }

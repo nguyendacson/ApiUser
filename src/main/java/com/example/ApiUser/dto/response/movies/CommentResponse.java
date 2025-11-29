@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class CommentResponse {
     String id;
     String user;
+    String name;
+    String avatar;
     String movie;
     String content;
     boolean owner;

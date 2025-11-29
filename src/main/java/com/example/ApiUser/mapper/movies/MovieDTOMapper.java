@@ -1,7 +1,9 @@
 package com.example.ApiUser.mapper.movies;
 
+import com.example.ApiUser.entity.callMovies.Category;
 import com.example.ApiUser.entity.callMovies.Director;
 import com.example.ApiUser.entity.callMovies.Movie;
+import com.example.ApiUser.entity.movies.CategoryDTO;
 import com.example.ApiUser.entity.movies.DirectorDTO;
 import com.example.ApiUser.entity.movies.MovieDTO;
 import org.mapstruct.Mapper;
@@ -16,6 +18,13 @@ public interface MovieDTOMapper {
         if (director == null) return null;
         return DirectorDTO.builder()
                 .name(director.getName())
+                .build();
+    }
+
+    default CategoryDTO toCategoryDTO(Category category) {
+        if (category == null) return null;
+        return CategoryDTO.builder()
+                .slug(category.getSlug())
                 .build();
     }
 }

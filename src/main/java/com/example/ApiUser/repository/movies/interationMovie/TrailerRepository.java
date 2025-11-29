@@ -3,6 +3,7 @@ package com.example.ApiUser.repository.movies.interationMovie;
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.entity.callMovies.Movie;
 import com.example.ApiUser.entity.movies.Trailer;
+import com.example.ApiUser.entity.movies.Watching;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,4 +18,7 @@ public interface TrailerRepository extends JpaRepository<Trailer, String> {
     List<Trailer> findAllByUser(User user, Sort sort);
 
     List<Trailer> findAllByUser(User user);
+
+    List<Trailer> findAllByMovie(Movie movie);
+
 }

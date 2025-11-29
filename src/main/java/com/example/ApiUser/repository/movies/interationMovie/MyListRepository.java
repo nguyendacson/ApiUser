@@ -3,6 +3,7 @@ package com.example.ApiUser.repository.movies.interationMovie;
 import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.entity.callMovies.Movie;
 import com.example.ApiUser.entity.movies.MyList;
+import com.example.ApiUser.entity.movies.Watching;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,9 @@ public interface MyListRepository extends JpaRepository<MyList, String> {
     Optional<MyList> findByUserAndMovie(User user, Movie movie);
 
     List<MyList> findAllByUser(User user, Sort sort);
+
+    List<MyList> findAllByUser(User user);
+
+    List<MyList> findAllByMovie(Movie movie);
+
 }

@@ -18,7 +18,7 @@ public interface MovieCallRepository extends JpaRepository<Movie, String>, JpaSp
     @Query("SELECT DISTINCT m.slug FROM Movie m WHERE m.slug IN :slugs AND LOWER(m.status) = LOWER(:status)")
     Set<String> findBySlugInAndStatusIgnoreCase(@Param("slugs") Set<String> slugs, @Param("status") String status);
 
-    Optional<Movie> findByName(String name);
+//    Optional<Movie> findBySlug(String slug);
 
     Optional<Movie> findBySlug(String slug);
 

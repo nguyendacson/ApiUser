@@ -1,7 +1,8 @@
 package com.example.ApiUser.controller.movies;
 
 import com.example.ApiUser.dto.request.movies.MovieFilterRequest;
-import com.example.ApiUser.dto.request.movies.WatchingRequest;
+import com.example.ApiUser.dto.request.movies.watching.UpdateWatchingRequest;
+import com.example.ApiUser.dto.request.movies.watching.WatchingRequest;
 import com.example.ApiUser.dto.request.movies.comments.CreateCommentRequest;
 import com.example.ApiUser.dto.request.movies.comments.UpdateCommentRequest;
 import com.example.ApiUser.dto.response.authentication.ApiResponse;
@@ -182,7 +183,27 @@ public class InteractionController {
                                                            @RequestParam(required = false) String type) {
         String userId = jwt.getClaimAsString("userId");
         return ApiResponse.<List<WatchingResponse>>builder()
-                .result(watchingService.allWatchingByUser(userId,type))
+                .result(watchingService.allWatchingByUser(userId, type))
+                .build();
+    }
+
+    @PatchMapping("/update/watchlist")
+    ApiResponse<String> updateWatching(@AuthenticationPrincipal Jwt jwt,
+                                       @RequestBody UpdateWatchingRequest updateWatchingRequest) {
+        String userId = jwt.getClaimAsString("userId");
+        watchingService.updateWatching(updateWatchingRequest, userId);
+        return ApiResponse.<String>builder()
+                .result("Update Successfully!")
+                .build();
+    }
+
+    @DeleteMapping("/{dataMovieId}/watchlist")
+    ApiResponse<String> deleteWatching(@AuthenticationPrincipal Jwt jwt,
+                                       @PathVariable String dataMovieId) {
+        String userId = jwt.getClaimAsString("userId");
+        watchingService.deleteWatching(dataMovieId, userId);
+        return ApiResponse.<String>builder()
+                .result("Delete Successfully!")
                 .build();
     }
 

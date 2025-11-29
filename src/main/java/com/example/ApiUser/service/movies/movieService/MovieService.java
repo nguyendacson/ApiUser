@@ -17,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,17 +49,26 @@ public class MovieService {
                 .orElseThrow(() -> new AppException(ErrorCode.MOV_NOT_FOUND));
 
         return movie.getEpisodes().stream()
-//                .sorted(Comparator.comparing(Episode::getServerName, Comparator.nullsLast(String::compareTo)))
-                .map(episode -> EpisodeResponse.builder()
-                        .serverName(episode.getServerName())
-                        .dataMovies(episode.getDataMovies().stream()
-                                .sorted(Comparator.comparing(DataMovie::getName, Comparator.nullsLast(String::compareTo)))
-                                .map(dataMovieMapper::toResponse)
-                                .toList()
-                        )
-                        .build()
-                ).toList();
+                .map(episode -> {
+                    // ✅ Log tất cả DataMovie trong episode
+                    episode.getDataMovies().forEach(dm ->
+                            System.out.println(">>> ENTITY DataMovie ID = " + dm.getId()
+                                    + " | name = " + dm.getName())
+                    );
+
+                    return EpisodeResponse.builder()
+                            .serverName(episode.getServerName())
+                            .dataMovies(
+                                    episode.getDataMovies().stream()
+                                            .sorted(Comparator.comparing(DataMovie::getName, Comparator.nullsLast(String::compareTo)))
+                                            .map(dataMovieMapper::toResponse)
+                                            .toList()
+                            )
+                            .build();
+                })
+                .toList();
     }
+
 
     public MovieDTO getMovieById(String id) {
         Movie movie = movieCallRepository.findById(id)

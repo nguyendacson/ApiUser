@@ -1,11 +1,12 @@
 package com.example.ApiUser.service.movies.interactionService;
 
-import com.example.ApiUser.dto.request.movies.WatchingRequest;
+import com.example.ApiUser.dto.request.movies.watching.UpdateWatchingRequest;
+import com.example.ApiUser.dto.request.movies.watching.WatchingRequest;
 import com.example.ApiUser.dto.response.movies.WatchingResponse;
+import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.entity.callMovies.DataMovie;
 import com.example.ApiUser.entity.callMovies.Movie;
 import com.example.ApiUser.entity.movies.Watching;
-import com.example.ApiUser.entity.authentication.users.User;
 import com.example.ApiUser.exception.AppException;
 import com.example.ApiUser.exception.ErrorCode;
 import com.example.ApiUser.mapper.movies.MovieDTOMapper;
@@ -17,7 +18,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +40,7 @@ public class WatchingService {
                 .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
 
         List<Watching> listWatching = watchingRepository.findAllByUser(user);
-        if (listWatching.isEmpty()){
+        if (listWatching.isEmpty()) {
             throw new AppException(ErrorCode.MOV_NOT_FOUND);
         }
 
@@ -48,7 +48,9 @@ public class WatchingService {
                 .filter(w -> filter == null || filter.isEmpty() || filter.equals(w.getMovie().getType()))
                 .map(item -> WatchingResponse.builder()
                         .movieDTO(movieDTOMapper.toDTO(item.getMovie()))
+                        .id(item.getId())
                         .dataMovieId(item.getDataMovie().getId())
+                        .dataMovieName(item.getDataMovie().getFilename())
                         .progressSeconds(item.getProgressSeconds())
                         .lastWatchedAt(item.getLastWatchedAt())
                         .build())
@@ -84,8 +86,40 @@ public class WatchingService {
         watchingRepository.save(watching);
     }
 
+    public void deleteWatching(String dataMovieId, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
+
+        DataMovie dataMovie = dataMovieRepository.findById(dataMovieId)
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_DATA_NOT_FOUND));
+
+
+        Watching watching = watchingRepository.findByUserAndDataMovie(user, dataMovie)
+                .orElseThrow(() -> new AppException(ErrorCode.LST_NOT_FOUND));
+
+        watchingRepository.delete(watching);
+    }
+
+
+    public void updateWatching(UpdateWatchingRequest updateWatchingRequest, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USR_NOT_FOUND));
+
+        DataMovie dataMovie = dataMovieRepository.findById(updateWatchingRequest.getDataMovieId())
+                .orElseThrow(() -> new AppException(ErrorCode.MOV_DATA_NOT_FOUND));
+
+
+        Watching watching = watchingRepository.findByUserAndDataMovie(user, dataMovie)
+                .orElseThrow(() -> new AppException(ErrorCode.LST_NOT_FOUND));
+
+        watching.setProgressSeconds(updateWatchingRequest.getNewProgressSeconds());
+        watchingRepository.save(watching);
+
+    }
+
+
     @Transactional
-    public void  deleteOldWatchingList() {
+    public void deleteOldWatchingList() {
 //        LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
         LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
         int deletedCount = watchingRepository.deleteByLastWatchedAtBefore(threshold);

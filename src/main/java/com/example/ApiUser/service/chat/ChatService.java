@@ -1,59 +1,74 @@
 package com.example.ApiUser.service.chat;
 
-import com.example.ApiUser.dto.request.chat.FilmInfo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.content.Media;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Objects;
 
 @Service
 public class ChatService {
+
     private final ChatClient chatClient;
 
     public ChatService(ChatClient.Builder builder) {
-        chatClient = builder.build();
+        this.chatClient = builder.build();
     }
 
-    public List<FilmInfo> chatWithImage(MultipartFile file, String message) {
-        String systemPrompt = """
-    You are an AI assistant for the Movie SeeMe app.
-    You will support users with questions about movies from the Movie SeeMe database.
-    When receiving an image, identify if it corresponds to a movie.
-    Always respond with a JSON array of FilmInfo objects.
-    If the image does not contain a movie, respond with an empty array [].
-    If the image contains a movie, do NOT rely on the text in the image. Instead, search online or use public movie databases to get accurate information.
-    If the user asks for support, respond with [{"title":"Contact Admin","info":"contact admin dacson1822003@gmail.com"}].
-""";
+    public String chat(MultipartFile file, String message) {
 
+        if ((file == null || file.isEmpty()) && (message == null || message.isBlank())) {
+            return "Không có dữ liệu để xử lý.";
+        }
 
-        var promptBuilder = chatClient.prompt()
-                .system(systemPrompt);
+        if (file != null && !file.isEmpty()) {
 
-        if (file == null || file.isEmpty()) {
-            return promptBuilder
-                    .user(spec -> spec.text(message))
-                    .call()
-                    .entity(new ParameterizedTypeReference<List<FilmInfo>>() {
-                    });
-        } else {
+            String systemPrompt = """
+                        Nếu hình ảnh liên quan đến phim, hãy mô tả tên phim, năm phát hành và nội dung chính bằng tiếng Việt.
+                        Không dựa vào chữ trên ảnh.
+                        Nếu không nhận diện được phim, hãy trả lời: 'Không xác định được phim từ hình ảnh này.'
+                    """;
+
             Media media = Media.builder()
                     .mimeType(MimeTypeUtils.parseMimeType(
                             Objects.requireNonNull(file.getContentType())))
                     .data(file.getResource())
                     .build();
 
-            return promptBuilder
-                    .user(spec -> spec
-                            .media(media)
-                            .text(message))
+            String result = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(spec -> spec.media(media))
                     .call()
-                    .entity(new ParameterizedTypeReference<List<FilmInfo>>() {
-                    });
+                    .entity(String.class);
+
+            return (result == null || result.isBlank())
+                    ? "Không xác định được phim từ hình ảnh này."
+                    : result;
         }
+
+
+        String systemPrompt = """
+                    Bạn là trợ lý AI cho ứng dụng Movie SeeMe do Nguyễn Đắc Sơn sáng lập.
+                    Bạn có thể trả lời mọi câu hỏi bằng tiếng Việt.
+                    Nếu câu hỏi liên quan đến phim, hãy trả lời thông tin phim bằng tiếng Việt.
+                    Nếu câu hỏi tổng quát (như 'Bạn là ai?'), hãy trả lời một cách tự nhiên bằng tiếng Việt.
+                    Hướng dẫn người dùng các tình huống thường gặp:
+                    1. Chỉnh màn hình sáng/tối: Vào Cài đặt → Cài đặt chung → Giao diện → Chọn kiểu muốn bạn muốn thay đổi.
+                    2. Thay đổi thông tin tài khoản: Vào Cài đặt → Tài khoản của bạn → Chọn thông tin cần thay đổi.
+                    3. Đăng ký email: Đăng ký email để phòng khi quên mật khẩu có thể khôi phục.
+                    4. Xác thực email: Cần xác thực để email có thể dùng khôi phục mật khẩu.
+                    5. Khó khăn/thắc mắc liên quan sản phẩm: Liên hệ Nguyễn Đắc Sơn, email: dacson1822003@gmail.com
+                    6. Tại sao không download được: Tính năng này đang phát triển.
+                    7. Muốn thêm email, thay đổi email làm th nào: Vào cài đặt, chọn tài khoản của bạn, chọn email sau đó nhập email muốn liên kết, sau đó ấn đăng kí/ cập nhật. Nếu thông báo thành công vào gmail để xác thưc email
+                    Nếu câu hỏi liên quan đến phim, trả lời thông tin phim bằng tiếng Việt.
+                    Nếu là câu hỏi chung, trả lời tự nhiên, rõ ràng bằng tiếng Việt.
+                """;
+        return chatClient.prompt()
+                .system(systemPrompt)
+                .user(spec -> spec.text(message))
+                .call()
+                .entity(String.class);
     }
 }

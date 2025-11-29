@@ -78,7 +78,7 @@ public class MovieController {
                 .build();
     }
 
-    @PostMapping("/search/{key}")
+    @GetMapping("/search/{key}")
     ApiResponse<List<MovieDTO>> searchMovie(@PathVariable(required = false) String key) {
         List<MovieDTO> list = movieService.searchMovie(key);
         if (list.isEmpty()){
@@ -89,15 +89,16 @@ public class MovieController {
                 .build();
     }
 
-    @PostMapping("/{movieId}/actor")
-    ApiResponse<List<String>> actorByMovie(@PathVariable String movieId) {
+    @GetMapping("/{movieId}/actors")
+    public ApiResponse<List<String>> actorByMovie(@PathVariable String movieId) {
         List<String> list = movieService.actorByMovie(movieId);
         return ApiResponse.<List<String>>builder()
                 .result(list)
                 .build();
     }
 
-    @PostMapping("/{movieId}/country")
+
+    @GetMapping("/{movieId}/country")
     ApiResponse<List<CountryResponse>> countryByMovie(@PathVariable String movieId) {
         List<CountryResponse> list = movieService.countryByMovie(movieId);
         return ApiResponse.<List<CountryResponse>>builder()
@@ -105,14 +106,14 @@ public class MovieController {
                 .build();
     }
 
-    @PostMapping("/{movieId}/director")
+    @GetMapping("/{movieId}/director")
     ApiResponse<List<String>> directorByMovie(@PathVariable String movieId) {
         List<String> list = movieService.directorByMovie(movieId);
         return ApiResponse.<List<String>>builder()
                 .result(list)
                 .build();
     }
-    @PostMapping("/{movieId}/episode")
+    @GetMapping("/{movieId}/episode")
     ApiResponse<List<EpisodeResponse>> episodeByMovie(@PathVariable String movieId) {
         List<EpisodeResponse> list = movieService.episodeByMovie(movieId);
         return ApiResponse.<List<EpisodeResponse>>builder()

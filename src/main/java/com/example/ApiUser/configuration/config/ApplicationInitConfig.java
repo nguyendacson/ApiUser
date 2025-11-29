@@ -26,17 +26,17 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
-            if (userRepository.findByUsername("admin").isEmpty()) {
+            if (userRepository.findByUsername("adminSonnd03").isEmpty()) {
                 var roles = roleRepository.findAllById(List.of("ADMIN"));
 
                 User user = User.builder()
                         .name("Admin SonND")
-                        .username("admin")
-                        .password(passwordEncoder.encode("admin"))
+                        .username("adminSonnd03")
+                        .password(passwordEncoder.encode("adminSonnd03"))
                         .roles(new HashSet<>(roles))
                         .build();
                 userRepository.save(user);
-                log.warn("admin user has been created with default password: admin, please change it");
+                log.warn("adminSonnd03 user has been created with default password: adminSonnd03, please change it");
             }
         };
     }

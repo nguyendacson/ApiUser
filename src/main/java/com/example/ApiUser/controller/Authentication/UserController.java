@@ -40,12 +40,15 @@ public class UserController {
     }
 
     @PutMapping("/update")
-    UserResponse updateUser(@AuthenticationPrincipal Jwt jwt,
-                            @RequestBody UserUpdateRequest userUpdateRequest) {
+    ApiResponse<String> updateUser(@AuthenticationPrincipal Jwt jwt,
+                                   @RequestBody UserUpdateRequest userUpdateRequest) {
 
         String userId = jwt.getClaimAsString("userId");
-
-        return userService.updateUser(userId, userUpdateRequest);
+        userService.updateUser(userId, userUpdateRequest);
+        return ApiResponse.<String>builder()
+                .success(true)
+                .message("Update user seccess")
+                .build();
     }
 
     @PutMapping("/avatar")
