@@ -7,6 +7,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -119,7 +121,8 @@ public class CallSlugService {
         return new SlugSets(newSlugs, duplicates);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @Async
+//    @PreAuthorize("hasRole('ADMIN')")
     public void createCallData() {
         SlugSets sets = checkSlug();
         Set<String> newSlugs = sets.newSlugs();
@@ -141,7 +144,7 @@ public class CallSlugService {
         });
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @Async
     public void updateCallData() {
         SlugSets sets = checkSlug();
         Set<String> duplicates = sets.duplicates();
